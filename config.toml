@@ -1,0 +1,49 @@
+# The URL the site will be built for
+base_url = "https://sahil-shubham.github.io/"
+title = "Sahil Shubham"
+lang = "en"
+
+# Whether to automatically compile all Sass files in the sass directory
+compile_sass = true
+
+# Whether to do syntax highlighting
+# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
+
+highlight_theme = "charcoal"
+theme = "sam"
+
+# Whether to build a search index to be used later on by a JavaScript library
+build_search_index = false
+
+check_external_links = "true"
+
+taxonomies = [
+    {name = "tags", rss = true}
+]
+
+[extra]
+# Put all your custom variables here
+show_word_count = true
+show_reading_time = true
+disqus_shortname = "https-sahil-shubham"
+
+date_format = "%A %e %b, %Y"
+
+home = "home"
+
+sam_menu = [
+    { text = "about", link = "/about" },
+    { text = "posts", link = "/posts" },
+    {text = "resume", link="/resume.pdf"}
+]
+
+sam_bottom_menu = true
+
+[extra.youtube]
+video_id = "6dtA9ka5fj4"
+
+[extra.social]
+mail = "mailto:sahil.shubham2000@gmail.com"
+twitter = "https://twitter.com/sahil_shubham_"
+github = "https://github.com/sahil-shubham"
+facebook = "https://www.facebook.com/sahil.shubham.779/"
