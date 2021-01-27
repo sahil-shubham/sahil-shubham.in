@@ -8,6 +8,12 @@ no_comments = true
 
 # Hi there
 
+I'm Sahil, second year undergraduate student at IIT Kharagpur. I'm a big open source enthusiast, and it is one of the reasons for my immense love
+for programming. I mostly spend my time writing half broken code in javascript, sometimes python. I can remember having a knack for computers and 
+technology in general since I was young (younger?). I have mostly been making stuff with React and currently getting my head around making custom hooks. NodeJS is also something I am working with although starting with backend programming made me realize how little I know, which makes this more fun :)
+
+Be sure to come back next time, I may have something new to read for you.
+
 <div class="social-icons">
 <a class="social-icons__link" href="mailto:sahil.shubham2000@gmail.com" rel="noopener" target="_blank">
 <svg class="feather feather-mail" fill="none" height="24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
