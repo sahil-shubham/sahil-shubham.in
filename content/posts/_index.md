@@ -1,2 +1,4 @@
-+++ title = "Posts" sort_by = "date" +++
-
++++
+title = "Posts"
+sort_by = "date"
++++

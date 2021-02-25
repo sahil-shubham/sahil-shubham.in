@@ -8,7 +8,7 @@ compile_sass = true
 
 # Whether to do syntax highlighting
 # Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
-
+highlight_code = true
 highlight_theme = "charcoal"
 theme = "sam"
 
@@ -25,7 +25,7 @@ taxonomies = [
 # Put all your custom variables here
 show_word_count = true
 show_reading_time = true
-disqus_shortname = "https-sahil-shubham"
+disqus_shortname = "https-sahil-shubham-github-io"
 
 date_format = "%A %e %b, %Y"
 
