@@ -1,9 +1,6 @@
 +++
 title = "Hello, World!"
 date = 2021-02-25
-[taxonomies]
-tags = ["hello-world"]
-
 +++
 
 ## Hello, World!
