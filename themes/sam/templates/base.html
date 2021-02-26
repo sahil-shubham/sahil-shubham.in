@@ -22,10 +22,12 @@
       }
     })();
   </script>
+  <div class="section">
+    <div class="theme-switcher">{{ macros::theme_switcher() }}</div>
+  </div>
   <div class="section" id="title">
     {% block title %}{% endblock title %}
 
-    <div class="theme-switcher">{{ macros::theme_switcher() }}</div>
   </div>
 
   <div class="section" id="content">
