@@ -1,3 +1,6 @@
+$screen-sm-max: 576px;
+$screen-sm-min: 577px;
+
 @mixin skinny-hr {
   margin: 1rem 0;
   background-color: transparent;
@@ -9,4 +12,10 @@
 
 @mixin ease($time) {
   transition: $time ease;
+}
+
+@mixin sm {
+  @media (max-width: #{$screen-sm-max}) {
+    @content;
+  }
 }

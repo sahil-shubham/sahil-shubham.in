@@ -9,14 +9,14 @@
 }
 
 .big-link {
-  font-family: $heading-font;
+  font-family: var(--heading-font);
   font-size: 3rem;
   font-weight: 300;
   margin-bottom: 2rem;
   line-height: 1.5em;
 }
 #title {
-  font-family: $heading-font;
+  font-family: var(--heading-font);
   margin-top: 3rem;
   font-size: 2rem;
   line-height: 3rem;
@@ -51,7 +51,7 @@
     border-radius: 3px;
     padding: 1rem;
     overflow-x: auto;
-    background-color: $code-block;
+    background-color: var(--code-block);
     width: 100%;
     margin-bottom: 1em;
   }
@@ -60,10 +60,10 @@
   }
   & code {
     font-size: 0.9rem;
-    font-family: $code-font;
+    font-family: var(--code-font);
     padding: 0.1rem;
     border-radius: 3px;
-    border: 1px solid $links;
+    border: 1px solid var(--links);
   }
   & img {
     width: 100%;
@@ -73,13 +73,13 @@
     opacity: 1;
   }
   & blockquote {
-    background-color: $links;
-    color: $dark-grey;
+    background-color: var(--links);
+    color: var(--dark-grey);
     padding: 2rem;
     margin: 2rem 1rem 2rem 1rem;
     border-radius: 3px;
     a {
-      color: $black;
+      color: var(--black);
     }
     & ul {
       margin-top: 1rem;
@@ -100,7 +100,7 @@
     th {
       padding: 2px 5px;
       text-align: center;
-      border: 1px solid $links;
+      border: 1px solid var(--links);
     }
   }
   & li {
@@ -127,23 +127,23 @@
     }
     & .gist-meta {
       background-color: transparent;
-      color: $body-text;
+      color: var(--body-text);
       & a {
-        color: $body-text;
+        color: var(--body-text);
       }
     }
   }
 }
 
 .byline {
-  font-family: $heading-font;
+  font-family: var(--heading-font);
   margin-bottom: 0em;
 }
 .tag {
   padding: 0.25em 0em;
   margin-right: 0.5em;
   opacity: 0.6;
-  font-family: $heading-font;
+  font-family: var(--heading-font);
 }
 .grid {
   display: grid;
@@ -176,7 +176,7 @@
 }
 .social-icons__link {
   padding: 0.8rem;
-  border-bottom: 0px solid $links;
+  border-bottom: 0px solid var(--links);
   color: #09cbcb;
   &:not(:last-child) {
     margin-right: 1em;

@@ -36,7 +36,27 @@
     </head>
     <body>
         {% block body %}
+            <script>
+                (function initTheme() {
+                let body = document.getElementsByTagName('body')[0];
+                if (window.localStorage.getItem('theme') !== null) {
+                    if (window.localStorage.getItem('theme') === 'dark') {
+                    body.setAttribute('data-theme', 'dark');
+                    } else {
+                    body.setAttribute('data-theme', 'light');
+                    }
+                } else {
+                    if (
+                    window.matchMedia &&
+                    window.matchMedia('(prefers-color-scheme: dark)').matches
+                    ) {
+                    body.setAttribute('data-theme', 'dark');
+                    }
+                }
+                })();
+            </script>
             <div class="section" id="splash">
+            <div class="theme-switcher">{{ macros::theme_switcher() }}</div>
                 {% if config.extra.sam_menu %}
                     {% for link in config.extra.sam_menu %}
                         <div class="big-link">
@@ -56,6 +76,10 @@
                     {% endfor %}
                 {% endif %}
             </div>
+            <script
+                src="{{ get_url(path='main.js', trailing_slash=false) }}"
+                type="text/javascript"
+            ></script>
         {% endblock body %}
     </body>
 </html>

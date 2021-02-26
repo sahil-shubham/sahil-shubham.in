@@ -1,15 +1,20 @@
-$white: #eee;
-$black: #111;
-$dark-grey: #000;
+:root,
+[data-theme='light'] {
+  --white: #eee;
+  --black: #111;
+  --dark-grey: #000;
 
-$font: 'Rajdhani', 'sans serif';
-$heading-font: 'OperatorMono';
-$code-font: 'DankMono';
+  --background-color: var(--white);
 
-$body-size: 16px;
-$body-text: $white;
+  --font: 'Rajdhani', 'sans serif';
+  --heading-font: 'OperatorMono';
+  --code-font: 'DankMono';
 
-$links: $white;
-$links-hover: #444;
+  --body-size: 16px;
+  --body-text: var(--black);
 
-$code-block: #000004;
+  --links: var(--black);
+  --links-hover: rgb(114, 114, 114);
+
+  --code-block: #000004;
+}
