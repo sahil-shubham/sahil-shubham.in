@@ -102,11 +102,13 @@ hr {
   align-items: flex-start;
 
   .theme-switcher {
+    display: inline-block;
+    top: 0;
+    right: 0;
+    position: absolute;
+    margin: 5rem 5rem 0 0;
+
     @include sm {
-      display: inline-block;
-      top: 0;
-      right: 0;
-      position: absolute;
       margin: 2rem 2rem 0 0;
     }
   }
