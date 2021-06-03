@@ -1,7 +1,7 @@
-@import 'vars';
-@import 'mixins';
-@import 'goingDark';
-@import 'elements';
+@import "vars";
+@import "mixins";
+@import "goingDark";
+@import "elements";
 
 * {
   margin: 0;
@@ -34,7 +34,7 @@ h2,
 h3 {
   margin-bottom: 0.5em;
   text-align: center;
-  font-family: 'Didact Gothic', sans-serif;
+  font-family: "Didact Gothic", sans-serif;
   opacity: 0.6;
 }
 li {
@@ -143,7 +143,7 @@ hr {
   }
 }
 
-Helpers .go-left {
+.go-left {
   justify-content: flex-start;
   align-items: flex-start;
 }
