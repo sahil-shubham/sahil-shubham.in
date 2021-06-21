@@ -53,13 +53,13 @@ This is necessary as it tells the company about your application. Usually, you w
 
 1. This step mostly involves the user clicking on a button which has a link with the following parameters: 
 
-   ```
-   https://authorization-server.com/auth?response_type=code&client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&scope=read
-   ```
+```
+https://authorization-server.com/auth?response_type=code&client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&scope=read
+```
 
-   - **response_type=code**: This indicates to the authorization server that your server expects to receive an authorization code/access token.
-   - **client_id**: This a code that you get when you first create an application
-   - **scope**: One or more scopes
+- **response_type=code**: This indicates to the authorization server that your server expects to receive an authorization code/access token.
+- **client_id**: This a code that you get when you first create an application
+- **scope**: One or more scopes
 
 2. When redirected to this page, you would be welcomed by the login screen which later would take you to the consent screen. If you are already logged in, you would be seeing the consent screen directly.  
 3. Once given the client application is given the permission, the user would be redirected back to the redirect URI with a code. This is where we put a "middle screen" which I named callback. 
