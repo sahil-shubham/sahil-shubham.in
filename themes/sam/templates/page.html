@@ -63,21 +63,13 @@
         </a>
         </div>
     {% if not page.extra.no_comments %}
-        {% if config.extra.disqus_shortname %}
-            <h1>Comments</h1>
-            <div id="disqus_thread"></div>
-            <script>
-                (function () {
-                    var d = document,
-                        s = d.createElement("script");
-                    s.src = "https://" + `{{ config.extra.disqus_shortname }}` + ".disqus.com/embed.js";
-                    s.setAttribute("data-timestamp", + new Date());
-                    (d.head || d.body).appendChild(s);
-                })();
-            </script>
-            <noscript>Please enable JavaScript to view the
-                <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
-            </noscript>
-        {% endif %}
+        <h1>Comments</h1>
+        <script src="https://utteranc.es/client.js"
+            repo="sahil-shubham/sahil-shubham.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
     {% endif %}
 {% endblock content %}

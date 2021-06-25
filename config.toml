@@ -25,7 +25,6 @@ taxonomies = [
 # Put all your custom variables here
 show_word_count = true
 show_reading_time = true
-disqus_shortname = "https-sahil-shubham-github-io"
 
 date_format = "%A %e %b, %Y"
 
