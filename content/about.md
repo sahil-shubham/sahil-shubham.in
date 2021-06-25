@@ -8,9 +8,10 @@ no_comments = true
 
 # Hi there
 
-I'm Sahil, second year undergraduate student at IIT Kharagpur. I'm a big open source enthusiast, and it is one of the reasons for my immense love
-for programming. I mostly spend my time writing half broken code in javascript, sometimes python. I can remember having a knack for computers and 
-technology in general since I was young (younger?). I have mostly been making stuff with React and currently getting my head around making custom hooks. NodeJS is also something I am working with although starting with backend programming made me realize how little I know, which makes this more fun :)
+I'm Sahil, third year undergraduate student at IIT Kharagpur. I'm an Open Source enthusiast, and it is one of the reasons for my immense love
+for programming. I mostly spend my time writing half broken code in JavaScript, sometimes Python. 
+
+Currently working with Redux and Styled-Components. Also, thinking of converting some old projects in React JavaScript to TypeScript, because why not :) 
 
 Be sure to come back next time, I may have something new to read for you.
 
