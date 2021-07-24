@@ -21,6 +21,8 @@ taxonomies = [
     {name = "tags", rss = true}
 ]
 
+generate_feed = true
+
 [extra]
 # Put all your custom variables here
 show_word_count = true
@@ -51,4 +53,4 @@ video_id = "6dtA9ka5fj4"
 mail = "mailto:sahil.shubham2000@gmail.com"
 twitter = "https://twitter.com/sahil_shubham_"
 github = "https://github.com/sahil-shubham"
-facebook = "https://www.facebook.com/sahil.shubham.779/"
+rss = "https://sahil-shubham.in/atom.xml"
