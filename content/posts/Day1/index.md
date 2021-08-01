@@ -72,7 +72,9 @@ This is how it looked which brought light to the two of the major issues with us
 
 - Words with embedded links had word after a pipe:
 
-  `<https://www.linkedin.com/company/edualgo/|eduAlgo>`
+```text
+ <https://www.linkedin.com/company/edualgo/|eduAlgo>
+```
 
 - Plain Links were in angle brackets but without the pipe
 - Emojis had to removed too, they were present by their name `:heavy_check_mark:`
@@ -130,7 +132,6 @@ Substitution:
 Select everything between two colons that's it, right? Nope. Consider this case:
 
 ```text
-
 ... :heavy_tick_mark:This blog is getting longer than expected :heavey_tick_mark: ....
 ```
 
