@@ -5,14 +5,7 @@ lang = "en"
 
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
-
-# Whether to do syntax highlighting
-# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
 theme = "sam"
-
-[markdown]
-highlight_code = true
-highlight_theme = "charcoal"
 
 # Whether to build a search index to be used later on by a JavaScript library
 build_search_index = false
@@ -23,7 +16,14 @@ taxonomies = [
     {name = "tags", rss = true}
 ]
 
+# To generate rss feed 
 generate_feed = true
+
+# Whether to do syntax highlighting
+# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
+[markdown]
+highlight_code = true
+highlight_theme = "charcoal"
 
 [extra]
 # Put all your custom variables here
