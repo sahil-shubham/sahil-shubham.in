@@ -1,32 +1,32 @@
 +++
 title = "Day-2, Adding Copy to Clipboard Button to Codeblocks"
-date = 2021-08-02
+date = 2021-08-01
 +++
 
-Around two months ago I had an opportunity of adding a copy to clipboard button for all codeblocks on a page. This is how I went about it.
+Around two months ago, I had the opportunity of adding a copy to clipboard button for all codeblocks on a page. This is how I went about it.
 
 # About the problem
 
-Search results on [Neera](https://neera.ai) are unique in a way that we show the top answer of all Stackoverflow questions when they are showed on the results.
+Search results on [Neera](https://neera.ai) are unique in a way that we show the top answer of all Stackoverflow questions when they are shown in the results.
 
 This is how they look when the page first loads:
 ![Initial Result View](answer_closed.png)
 
-Once can click to see the answer:
+Once you click to see the answer:
 ![Answer preview](answer_open.png)
 
-This was an easy method to quickly get the accepted/most upvoted answer on Stackoverflow.
+This provided was an easy method to quickly get the accepted/most upvoted answer on Stackoverflow.
 
-We did this by making a server which had the archive of all of Stackoverflow. We sent this server all the question id after after search and in return we received top answers of all the questions.
-More explained about how we set this up and put such a large archive in database [here](https://hargup.substack.com/p/lab-notebook-creating-a-stackoverflow).
+We did this by making a server which had an archive of all of Stackoverflow. We sent this server all the question id after after search and in return we received top answers of all the questions.
+More explained about how we set this up and put such a large archive in a database [here](https://hargup.substack.com/p/lab-notebook-creating-a-stackoverflow).
 
 ## Okay, so what are we working on?
 
-Stackoverflow doesn't have the feature of copying the contents of a multi-lined codeblock. We wanted to add this button to our answers previews.
+Stackoverflow doesn't have the feature of copying the contents of a multi-lined codeblock using a single click. We wanted to add a button to do the same to our answer previews.
 
 ## First things first
 
-I first inspected and saw a `pre` tag is put before the usual `code` tag when it comes to multi-lined codeblocks.
+I first inspected and saw that a `pre` tag is present before the usual `code` tag when it comes to multi-lined codeblocks.
 
 ```html
 <pre>
@@ -36,7 +36,7 @@ I first inspected and saw a `pre` tag is put before the usual `code` tag when it
 </pre>
 ```
 
-I dind't want a copy button when there is a single word or a few words of code, which is similar to single backticks in the case of markdown.
+I din't want a copy button when there is a single word or a few words of code, which is similar to single backticks in the case of markdown.
 
 Hence, I targeted the content of only those `<code>` tags that resided inside `<pre>` tags.
 
@@ -74,7 +74,7 @@ function addCopyButtons(clipboard) {
 
 I put the code above in the `useEffect` hook, as we use React for our frontend. This would add the buttons just when the page renders.
 
-Happy with what I had written till now, I tried looking at what it looked like and to my surprise there was no button to be found :|
+Content with what I had written till now, I tried looking at what it looked like and to my surprise there was no button to be found :|
 
 ## What is happening? or to be exact why is nothing happening?
 
@@ -165,7 +165,7 @@ So, here is what's happening:
 
 # Explain to me like I am 5 (not really, but you get the point)
 
-The point I am getting at is that, till I open the answers they aren't a part of the document and even when I do open the answers the function to
+The point that I am getting at is that till I opened the answers they aren't a part of the document and even when I do open the answers the function to
 add buttons has already finished running. **Hence, the reason there were no buttons is that there were no codeblocks at that time**.
 
 ## What now?
