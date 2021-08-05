@@ -35,12 +35,12 @@ h3 {
   margin-bottom: 0.5em;
   text-align: center;
   font-family: "Didact Gothic", sans-serif;
-  opacity: 0.6;
+  opacity: 1;
 }
 li {
-  opacity: 0.8;
+  opacity: 1;
   a {
-    opacity: 0.9;
+    opacity: 1;
   }
 }
 ul {
@@ -48,7 +48,6 @@ ul {
 }
 p {
   display: inline;
-  opacity: 0.8;
 }
 a {
   color: var(--links);
@@ -136,7 +135,7 @@ hr {
   font-family: var(--font);
   font-size: 1rem;
   line-height: 1em;
-  opacity: 0.8;
+  opacity: 1;
   a {
     border-bottom: none;
     display: contents;
