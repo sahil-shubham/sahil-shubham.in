@@ -7,7 +7,7 @@ I like localStorage. They have always been the goto place whenever I needed to s
 
 This blogpost is about an unexpected issue I ran into while optimizing the search results speed on Neera.
 
-## Preface
+# Preface
 
 Neera offers custom profiles which make search through particular websites, or personal documents easier. Anyone can make any number of personalized tabs to shift through different sources quickly to filter search results. One just need to signUp on Neera. But this wasn't how it always was.
 
@@ -30,7 +30,7 @@ As you can see there is a lot happening, our searches were better but they would
 
 I wanted us to have a middle ground and hence tried to keep the profiles client side itself, because they would only change when an user modifies them at which point I would update them in both the backend and frontend. This would help in getting us directly at step 4. Decreasing 1-2 request calls.
 
-## The issue
+# The issue
 
 I implemented the above and tested cases where someone could be opening the website for the first time,or multiple times, how it looks on network throttling or if the profiles were present in localStorage but empty. Everything seemed fine.
 
@@ -42,7 +42,7 @@ Did I make a mistake? Umm, most probably. Better question would be, what mistake
 
 Remember how I mentioned Neera didn't use to have user logins and depended on localStorage for profiles? Well coincidentally I stored profiles in the same key name we used to, but in a different format ofcourse, as things have changed. Technically the user above did have the profiles but in a different format :|
 
-## How to fix it? and did we do it?
+# How to fix it? and did we do?
 
 We looked at our options:
 
