@@ -3,23 +3,25 @@ title = "Day-6, Writing what you don't know"
 date = 2021-08-05
 +++
 
-I am always interested in knowing what things I don't know about, everything isn'ts supposed to learnt immediately, if ever. But knowing what you don't know if one of the most important things in making someone humble.
+I am always interested in knowing what things I don't know about, everything isn't supposed to learnt immediately, if ever. But knowing what you don't know is something I find important.
 
 ## How?
 
-Because of this being the first time I was writing this, I just didn't know where to start and how in depth should I go into something before marking it as someting I am good at or not.
+I never sat down and made a list explicitly, keeping everything in mind was always how I did it. I think I didn't know that one can forget things :p
+
+Hence because of this being the first time I was writing this, I just didn't know where to start and how in depth should I go into something before marking it as someting I am good at or not.
 
 I spent ample amount of time thinking about things but was only on my way on getting into an [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis), so I ended up looking at [roadmap.sh](https://roadmap.sh) as a checklist. I am assuming that it's a good enough list for now just based on how many stars it has on GitHub (~168k).
 
-I wouldn't say that I don't know few the things I have kept unmarked but I am doing so that I end up looking into those things once again. It has been a considerable time I looked at them and hence think that I would explore them in more depth if done now.
+I wouldn't say that I don't know few of the things I have kept unmarked but I am doing so, so that I end up looking into those things once again. It has been long since I looked at them and hence think that I would explore them in more depth if done now.
 
 The three questions that need to be answered are:
 
-- Things I am good at
-- Things I want to get better at
-- What is my training plan for this?
+1. Things I am good at
+2. Things I want to get better at
+3. What is my training plan for this?
 
-I am combining question 1 and 2 for now, but would try to answer them separately and be more to the point the next time I make a list like this. I have set a calendar event for 5th September to look back at this.
+I am combining question 1 and 2 for now, but would try to answer them separately and be more to the point next time. I have set a calendar event for 5th September to look back at this.
 
 # Things I am good at & Things I want to get better at
 
@@ -50,7 +52,7 @@ I am combining question 1 and 2 for now, but would try to answer them separately
   - [x] Flex Box
 - JavaScript
   - [x] Syntax and Basic Constructs
-  - [ ] Learn DOM Manipulation
+  - [x] Learn DOM Manipulation
   - [x] Learn Fetch API / Ajax (XHR)
   - [x] ES 6+ and modular JavaScript
 - CSS Architecture
@@ -66,7 +68,7 @@ I am combining question 1 and 2 for now, but would try to answer them separately
   - [ ] Angular
   - [ ] Vue.js
 - Web Components
-  - [ ] HTML Templates
+  - [x] HTML Templates
   - [ ] Custom Elements
   - [x] Shadow DOM
 - CSS Frameworks
@@ -87,7 +89,7 @@ I am combining question 1 and 2 for now, but would try to answer them separately
   - [ ] Notifications
   - [ ] Device Orientation
   - [ ] Payments
-  - [ ] Credentials
+  - [x] Credentials
   - [ ] PRPL Pattern
   - [ ] RAIL Model
   - [ ] Performance Metrics
@@ -148,8 +150,8 @@ I am combining question 1 and 2 for now, but would try to answer them separately
   - [ ] Threads and Concurrency
   - [ ] Memory Management
   - [ ] Interprocess Communication
-  - [ ] I/O Management
-  - [ ] POSIX Basics
+  - [x] I/O Management
+  - [x] POSIX Basics
   - [ ] Basic Networking Concepts
 - Learn a Language
   - [ ] Rust
@@ -164,15 +166,15 @@ I am combining question 1 and 2 for now, but would try to answer them separately
   - [x] MongoDB
   - [ ] DynamoDB
 - More about Databases
-  - [ ] ORMs
-  - [ ] ACID
-  - [ ] Transactions
-  - [ ] N+1 Problem
+  - [x] ORMs
+  - [x] ACID
+  - [x] Transactions
+  - [x] N+1 Problem
   - [ ] Database Normalization
   - [ ] Indexes and how they work
   - [ ] Data Replication
   - [ ] Sharding Strategies
-  - [ ] CAP Theorem
+  - [x] CAP Theorem
 - Learn about APIs
   - [x] REST
   - [x] JSON APIs
