@@ -1,5 +1,5 @@
 +++
-title = "Day-6, Writing what you don't know"
+title = "Day-6, Writing a list of what you don't know"
 date = 2021-08-05
 +++
 
