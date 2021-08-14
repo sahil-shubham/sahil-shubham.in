@@ -7,21 +7,21 @@ I am always interested in knowing what things I don't know about, everything isn
 
 ## How?
 
-I never sat down and made a list explicitly, keeping everything in mind was always how I did it. I think I didn't know that one can forget things :p
+I never sat down and made a list and used to keep everything in mind. I think it's better that I realize that I also don't know how to remember things :p
 
-Hence because of this being the first time I was writing this, I just didn't know where to start and how in depth should I go into something before marking it as someting I am good at or not.
+Hence, because of this being the first time I was making a list, I just didn't know where to start and how in depth I should go into something before marking it as something I am good at.
 
-I spent ample amount of time thinking about things but was only on my way on getting into an [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis), so I ended up looking at [roadmap.sh](https://roadmap.sh) as a checklist. I am assuming that it's a good enough list for now just based on how many stars it has on GitHub (~168k).
+I spent ample amount of time thinking but was only on my way on getting into an [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis), so I ended up looking at [roadmap.sh](https://roadmap.sh) as a checklist. I am assuming that it's a good enough list just based on how many stars it has on GitHub (~168k).
 
-I wouldn't say that I don't know few of the things I have kept unmarked but I am doing so, so that I end up looking into those things once again. It has been long since I looked at them and hence think that I would explore them in more depth if done now.
+Also, I wouldn't say that I don't know few of the things I have kept unmarked, but have kept them unmarked so that I end up looking into those once again. It has been long time since I used/learned them and hence think that I would explore them in more depth if done now.
 
-The three questions that need to be answered are:
+The three questions that need to be answered here are:
 
 1. Things I am good at
 2. Things I want to get better at
 3. What is my training plan for this?
 
-I am combining question 1 and 2 for now, but would try to answer them separately and be more to the point next time. I have set a calendar event for 5th September to look back at this.
+I am combining question 1 and 2 for now, but would try to answer them separately next time. I have set a calendar event for 5th September to look back at this.
 
 # Things I am good at & Things I want to get better at
 
