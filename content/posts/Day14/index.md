@@ -1,17 +1,17 @@
 +++
-title="Day-14, LocalStorage need to kept in check"
+title="Day-14, LocalStorage needs to kept in check"
 date=2021-08-13
 +++
 
-I like localStorage. They have always been the goto place whenever I needed to store anything easily and/or momentarily. Sometimes as a check for first time visitors, sometimes as a **low grade** state managment or sometimes when I don't want to ask the server for something frequently.
+I like localStorage. It has always been the goto place whenever I needed to store anything easily and/or momentarily. Sometimes as a check for first time visitors, or sometimes as a **low grade** state managment or sometimes when I don't want to ask the server for something frequently.
 
 This blogpost is about an unexpected issue I ran into while optimizing the search results speed on Neera.
 
 # Preface
 
-Neera offers custom profiles which make search through particular websites, or personal documents easier. Anyone can make any number of personalized tabs to shift through different sources quickly to filter search results. One just need to signUp on Neera. But this wasn't how it always was.
+Neera offers custom profiles which make searching through particular websites, or personal documents easier. Anyone can make any number of personalized tabs to shift through different sources quickly to filter search results. One just need to signUp on Neera. But this wasn't how it always was.
 
-During the early stages of Neera, profiles weren't customizable and were same for everyone. These were set on the first render and were stored in the localStorage from where they were later taken from. We later implemented signUp on our platform which changed the workflow of getting a result to the following:
+During the early stages of Neera, profiles weren't customizable and were same for everyone. These were set on the first visit and were stored in the localStorage from where they were later taken from. We later implemented signUp on our platform which changed the workflow of getting a result to the following:
 
 (Let's assume Neera is the default search engine)
 
@@ -26,15 +26,22 @@ During the early stages of Neera, profiles weren't customizable and were same fo
 5. Now it sends a request to the backend with the query and the selected tab and profile which lets it know what results it should filter or API should it use (in some cases we use a service specific API rather than filtering search results by domain, e.g. GitHub)
 6. The backend uses Google/Bing API and send back the results which are later rendered
 
-As you can see there is a lot happening, our searches were better but they would always be slower than other search engines because they start their process at step 5.
+As you can see, there is a lot happening. Our searches were better but they would always be slower than other search engines because they start their process at step 5.
 
 I wanted us to have a middle ground and hence tried to keep the profiles client side itself, because they would only change when an user modifies them at which point I would update them in both the backend and frontend. This would help in getting us directly at step 4. Decreasing 1-2 request calls.
 
 # The issue
 
-I implemented the above and tested cases where someone could be opening the website for the first time,or multiple times, how it looks on network throttling or if the profiles were present in localStorage but empty. Everything seemed fine.
+I implemented the above and tested cases where
 
-Pushed and deployed, really happy with the results we continued with other work for the next few weeks. Only to be contacted by one of the first users who had trouble opening the site which they hadn't since a few months.
+- someone could be opening the website for the first time,
+- or multiple times,
+- or how it looks on network throttling
+- or if the profiles were present in localStorage but empty.
+
+Everything seemed fine.
+
+Pushed and deployed, happy with the results we continued with other work for the next few weeks. Only to be contacted by one of the first users who had trouble opening the site which they hadn't since a few months.
 
 Fortunately for us, they attached the screenshot with their console open (We need more people like this). Somehow the profiles were undefined, but I had implemented a check for this.
 
@@ -53,7 +60,7 @@ We looked at our options:
 
 We went with the last option, as it requires less work as well as less uncertainty about whether they would work in every case.
 
-If one is constantly dependant on localStorage for their needs. They need to keep a check on it. So that no one whether old or new faces any issue with a new feature implementation. We were fairly lucky because of an user informing us, but there can be other users who never got to see how far everything has come due to this.
+If one is constantly dependant on localStorage for their needs. They need to keep a check on it. So that no user whether old or new faces any issue with a new feature implementation. We were fairly lucky because of an user informing us, but there can be other users who never got to see how far everything has come due to this.
 
 Anyways, every cloud has a silver lining :)
 
