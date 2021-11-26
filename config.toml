@@ -1,5 +1,5 @@
 # The URL the site will be built for
-base_url = "https://sahil-shubham.in/"
+base_url = "https://sahil-shubham.in"
 title = "Sahil Shubham"
 lang = "en"
 
