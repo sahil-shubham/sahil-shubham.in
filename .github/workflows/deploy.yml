@@ -1,4 +1,8 @@
-on: push
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "master"
 name: Deployment
 jobs:
   build:
