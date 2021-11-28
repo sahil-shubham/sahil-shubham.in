@@ -1,0 +1,29 @@
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+name: Deploy to EC2
+jobs:
+  build:
+    name: shalzz/zola-deploy-action
+    runs-on: ubuntu-latest
+    steps:
+    # Followed this for ssh setup - https://zellwk.com/blog/github-actions-deploy/
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: "just-a-placeholder"
+      - name: Adding correct known_hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Install Zola
+        run: |
+          wget https://github.com/getzola/zola/releases/download/v0.14.1/zola-v0.14.1-x86_64-unknown-linux-gnu.tar.gz
+          tar -xzf zola-v0.14.1-x86_64-unknown-linux-gnu.tar.gz
+      - name: Build site
+        run: ./zola build
+      - name: Send public folder to EC2 instance
+        run: rsync -avz ./public ubuntu@${{ secrets.SSH_HOST }}:/home/ubuntu
