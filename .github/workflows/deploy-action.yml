@@ -6,7 +6,6 @@ on:
 name: Deploy to EC2
 jobs:
   build:
-    name: shalzz/zola-deploy-action
     runs-on: ubuntu-latest
     steps:
     # Followed this for ssh setup - https://zellwk.com/blog/github-actions-deploy/
@@ -26,4 +25,4 @@ jobs:
       - name: Build site
         run: ./zola build
       - name: Send public folder to EC2 instance
-        run: rsync -avz ./public ubuntu@${{ secrets.SSH_HOST }}:/home/ubuntu
+        run: rsync -avz ./public/ ubuntu@${{ secrets.SSH_HOST }}:/home/ubuntu
