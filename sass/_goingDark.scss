@@ -3,10 +3,12 @@
   --white: #eee;
   --black: #111;
   --dark-grey: #000;
+  --accent-color: #09cbcb;
+  --light-accent-color: rgba(255,255,255,0.2);
 
   --background-color: var(--black);
 
-  --font: 'Rajdhani', 'sans serif';
+  --font: 'Rajdhani', 'sans-serif';
   --heading-font: 'OperatorMono';
   --code-font: 'DankMono';
 
@@ -14,7 +16,7 @@
   --body-text: var(--white);
 
   --links: var(--white);
-  --links-hover: #444;
+  --links-hover: var(--accent-color);
 
   --code-block: #000004;
 }
@@ -25,7 +27,7 @@
   vertical-align: middle;
   .theme-button {
     cursor: pointer;
-    background-color: var(--dark-grey);
+    background-color: var(--light-accent-color);
     width: 78px;
     height: 36px;
     border-radius: 18px;
@@ -37,13 +39,13 @@
   #dayIcon {
     position: relative;
     left: 8px;
-    fill: var(--body-text);
+    fill: var(--white);
   }
 
   #nightIcon {
     position: relative;
     right: 8px;
-    fill: var(--links-hover);
+    fill: var(--black);
   }
 
   #dayIcon,
@@ -52,7 +54,7 @@
     width: 20px;
     cursor: pointer;
     z-index: 10;
-    top: 4px;
+    top: 5px;
     transition: fill 0.25s ease-in-out;
   }
 
@@ -70,7 +72,7 @@
     margin-left: -2px;
     margin-top: -2px;
     transition: all 0.25s ease-in-out;
-    background-color: var(--white);
+    background-color: var(--accent-color);
     @include sm {
       margin-top: 0px;
     }
@@ -78,7 +80,7 @@
 
   &:hover {
     .toggle-button {
-      box-shadow: 0px 4px 10px var(--white);
+      box-shadow: 0px 4px 10px var(--accent-color);
     }
   }
 }
