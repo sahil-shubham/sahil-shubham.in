@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta content="chrome=1" http-equiv="X-UA-Compatible"/>
+        <meta content="True" name="HandheldFriendly"/>
+        <meta content="320" name="MobileOptimized"/>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <meta content="no-referrer" name="referrer"/>
+        
+            <link href='&#x2F;favicons&#x2F;site.webmanifest' rel="manifest"/>
+        
+        
+        
+            <link href='&#x2F;favicons&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png"/>
+        
+        
+            <link href='&#x2F;favicons&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png"/>
+        
+        
+            <link href='&#x2F;favicons&#x2F;apple-touch-icon.png' rel="apple-touch-icon" sizes="180x180"/>
+        
+        <link href="https://sahil-shubham.in/fonts.css" rel="stylesheet"/>
+        <link href="https://sahil-shubham.in/style.css" rel="stylesheet"/>
+        <title>
+            
+    Day-2, Adding Copy to Clipboard Button to Codeblocks
+
+        </title>
+        
+
+        <script async defer data-website-id="9b2dfb9e-f887-4742-8a97-d49a487f5463" src="https://umami.sahil-shubham.in/umami.js"></script>
+    </head>
+    <body>
+        
+<div class="wrap">
+  <script>
+    (function initTheme() {
+      let body = document.getElementsByTagName('body')[0];
+      if (window.localStorage.getItem('theme') !== null) {
+        if (window.localStorage.getItem('theme') === 'dark') {
+          body.setAttribute('data-theme', 'dark');
+        } else {
+          body.setAttribute('data-theme', 'light');
+        }
+      } else {
+        if (
+          window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches
+        ) {
+          body.setAttribute('data-theme', 'dark');
+        }
+      }
+    })();
+  </script>
+  <div class="section">
+    <div class="theme-switcher">
+    <div class="theme-button" onClick="toggleTheme()">
+        <label for="cb1">
+            <svg
+                id="dayIcon"
+                style="enable-background:new 0 0 35 35;"
+                version="1.1"
+                viewBox="0 0 35 35"
+                x="0px"
+                xml:space="preserve"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns="http://www.w3.org/2000/svg"
+                y="0px">
+                <g id="Sun">
+                    <g>
+                        <path
+                            d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5 S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z
+                                M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5
+                                C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6
+                                C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9
+                                c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44
+                                l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5
+                                c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06 L6.439,8.561z
+                                M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z
+                                M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2
+                                C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29
+                                c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7
+                                C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5
+                                c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z"
+                            style="fill-rule:evenodd;clip-rule:evenodd;"/>
+                    </g>
+                </g>
+            </svg>
+        </label>
+        <input class="toggle" id="cb1" onClick="toggleTheme()" type="checkbox"/>
+        <label class="toggle-button" for="cb1"></label>
+        <label for="cb1">
+            <svg
+                enable-background="new 0 0 100 100"
+                id="nightIcon"
+                version="1.1"
+                viewBox="0 0 100 100"
+                x="0px"
+                xml:space="preserve"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns="http://www.w3.org/2000/svg"
+                y="0px">
+                <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571
+                C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23
+                c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369
+                c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65 c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z"/>
+            </svg>
+        </label>
+    </div>
+</div>
+  </div>
+  <div class="section" id="title">
+    
+    Day-2, Adding Copy to Clipboard Button to Codeblocks
+
+
+  </div>
+
+  <div class="section" id="content">
+    
+    
+        <div class="byline">
+            
+                
+    
+    Sunday  1 Aug, 2021
+
+            
+            
+                
+                    &#183; 1020 words
+                
+            
+            
+                
+                
+                    &#183; 6 min
+                
+            
+        </div>
+        
+        <hr/>
+    <p>Around two months ago, I had the opportunity of adding a copy to clipboard button for all codeblocks on a page. This is how I went about it.</p>
+<h1 id="about-the-problem">About the problem</h1>
+<p>Search results on <a href="https://neera.ai">Neera</a> are unique in a way that we show the top answer of all Stackoverflow questions when they are shown in the results.</p>
+<p>This is how they look when the page first loads:
+<img src="https://sahil-shubham.in/posts/day2/answer_closed.png" alt="Initial Result View" /></p>
+<p>Once you click to see the answer:
+<img src="https://sahil-shubham.in/posts/day2/answer_open.png" alt="Answer preview" /></p>
+<p>This provided was an easy method to quickly get the accepted/most upvoted answer on Stackoverflow.</p>
+<p>We did this by making a server which had an archive of all of Stackoverflow. We sent this server all the question id after after search and in return we received top answers of all the questions.
+More explained about how we set this up and put such a large archive in a database <a href="https://hargup.substack.com/p/lab-notebook-creating-a-stackoverflow">here</a>.</p>
+<h2 id="okay-so-what-are-we-working-on">Okay, so what are we working on?</h2>
+<p>Stackoverflow doesn't have the feature of copying the contents of a multi-lined codeblock using a single click. We wanted to add a button to do the same to our answer previews.</p>
+<h2 id="first-things-first">First things first</h2>
+<p>I first inspected and saw that a <code>pre</code> tag is present before the usual <code>code</code> tag when it comes to multi-lined codeblocks.</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">pre</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">code</span><span style="color:#5fb3b3;">&gt;	
+</span><span>   ...
+</span><span>  </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">code</span><span style="color:#5fb3b3;">&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">pre</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+<p>I din't want a copy button when there is a single word or a few words of code, which is similar to single backticks in the case of markdown.</p>
+<p>Hence, I targeted the content of only those <code>&lt;code&gt;</code> tags that resided inside <code>&lt;pre&gt;</code> tags.</p>
+<h2 id="too-much-talk-let-s-code-now">Too much talk, let's code now</h2>
+<p>This is the first iteration of code I wrote, after getting help from <a href="https://www.dannyguo.com/blog/how-to-add-copy-to-clipboard-buttons-to-code-blocks-in-hugo/">this article</a>.
+This used JavaScript <a href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator/clipboard">Clipboard API</a>.</p>
+<pre data-lang="javascript" style="background-color:#2b2c2f;color:#cccece;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#c594c5;">function </span><span style="color:#6699cc;">addCopyButtons</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">clipboard</span><span style="color:#5fb3b3;">) {
+</span><span>  </span><span style="color:#6699cc;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">querySelectorAll</span><span>(</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">pre &gt; code</span><span style="color:#5fb3b3;">&quot;</span><span>)</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">forEach</span><span>(</span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">codeBlock</span><span style="color:#5fb3b3;">) {
+</span><span>    </span><span style="color:#c594c5;">var </span><span>button </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">createElement</span><span>(</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">button</span><span style="color:#5fb3b3;">&quot;</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>    button</span><span style="color:#5fb3b3;">.</span><span>className </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">copy-code-button</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    button</span><span style="color:#5fb3b3;">.</span><span>type </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">button</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    button</span><span style="color:#5fb3b3;">.</span><span>innerText </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Copy</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>    button</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">addEventListener</span><span>(</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">click</span><span style="color:#5fb3b3;">&quot;, </span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">() {
+</span><span>      clipboard</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">writeText</span><span>(codeBlock</span><span style="color:#5fb3b3;">.</span><span>innerText)</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span>(
+</span><span>        </span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">() {
+</span><span>          button</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">blur</span><span>()</span><span style="color:#5fb3b3;">;
+</span><span>          button</span><span style="color:#5fb3b3;">.</span><span>innerText </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Copied!</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>          </span><span style="color:#6699cc;">setTimeout</span><span>(</span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">() {
+</span><span>            button</span><span style="color:#5fb3b3;">.</span><span>innerText </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Copy</span><span style="color:#5fb3b3;">&quot;;
+</span><span>          </span><span style="color:#5fb3b3;">}, </span><span style="color:#f99157;">2000</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>        </span><span style="color:#5fb3b3;">},
+</span><span>        </span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">error</span><span style="color:#5fb3b3;">) {
+</span><span>          button</span><span style="color:#5fb3b3;">.</span><span>innerText </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Error</span><span style="color:#5fb3b3;">&quot;;
+</span><span>        </span><span style="color:#5fb3b3;">}
+</span><span>      )</span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>  </span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>I put the code above in the <code>useEffect</code> hook, as we use React for our frontend. This would add the buttons just when the page renders.</p>
+<p>Content with what I had written till now, I tried looking at what it looked like and to my surprise there was no button to be found :|</p>
+<h2 id="what-is-happening-or-to-be-exact-why-is-nothing-happening">What is happening? or to be exact why is nothing happening?</h2>
+<p>Let's go over the code once again, line by line this time.</p>
+<ul>
+<li>
+<p>This would get all the content inside a code tag that exists inside a pre tag <strong>throughout the page</strong></p>
+<pre data-lang="javascript" style="background-color:#2b2c2f;color:#cccece;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span>  </span><span style="color:#6699cc;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">querySelectorAll</span><span>(</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">pre &gt; code</span><span style="color:#5fb3b3;">&quot;</span><span>)</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">forEach</span><span>(</span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">codeBlock</span><span style="color:#5fb3b3;">)
+</span></code></pre>
+</li>
+<li>
+<p>This creates a button with the <code>className</code> (instead of <code>class</code> because it's React) and adds the text &quot;Copy&quot; inside of it</p>
+<pre data-lang="javascript" style="background-color:#2b2c2f;color:#cccece;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#c594c5;">var </span><span>button </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">createElement</span><span>(</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">button</span><span style="color:#5fb3b3;">&quot;</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>button</span><span style="color:#5fb3b3;">.</span><span>className </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">copy-code-button</span><span style="color:#5fb3b3;">&quot;;
+</span><span>button</span><span style="color:#5fb3b3;">.</span><span>type </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">button</span><span style="color:#5fb3b3;">&quot;;
+</span><span>button</span><span style="color:#5fb3b3;">.</span><span>innerText </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Copy</span><span style="color:#5fb3b3;">&quot;;
+</span></code></pre>
+</li>
+<li>
+<p>This adds a click function while adding the button inside the codeblock. After clicking the button the text inside changes to &quot;Copied!&quot; which changes back to &quot;Copy&quot; after 2000 miliseconds. Also, it displays if any error encountered.</p>
+<pre data-lang="javascript" style="background-color:#2b2c2f;color:#cccece;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span>button</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">addEventListener</span><span>(</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">click</span><span style="color:#5fb3b3;">&quot;, </span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">() {
+</span><span>  clipboard</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">writeText</span><span>(codeBlock</span><span style="color:#5fb3b3;">.</span><span>innerText)</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span>(
+</span><span>    </span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">() {
+</span><span>      button</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">blur</span><span>()</span><span style="color:#5fb3b3;">;
+</span><span>      button</span><span style="color:#5fb3b3;">.</span><span>innerText </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Copied!</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>      </span><span style="color:#6699cc;">setTimeout</span><span>(</span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">() {
+</span><span>        button</span><span style="color:#5fb3b3;">.</span><span>innerText </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Copy</span><span style="color:#5fb3b3;">&quot;;
+</span><span>      </span><span style="color:#5fb3b3;">}, </span><span style="color:#f99157;">2000</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#5fb3b3;">},
+</span><span>    </span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">error</span><span style="color:#5fb3b3;">) {
+</span><span>      button</span><span style="color:#5fb3b3;">.</span><span>innerText </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Error</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>  )</span><span style="color:#5fb3b3;">;
+</span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span></code></pre>
+</li>
+</ul>
+<p>While I know I didn't go over &quot;line by line&quot;, but I still don't see any issue. Do you?</p>
+<p>So after spending 20 minutes looking figuring out where I was going wrong in the developer tools, I realized the issue.</p>
+<p>Remember how the results look when results first render? and remember how I used <code>useEffect</code> and how it worked just when the page renders?</p>
+<h1 id="is-this-supposed-to-be-the-point-i-understand-things">Is this supposed to be the point I understand things?</h1>
+<p>So, here is what's happening:</p>
+<ul>
+<li>
+<p>Just when the page renders, the function to add buttons throughout the document runs.</p>
+</li>
+<li>
+<p>But, as the answers are closed at the start the answers aren't part of the document.</p>
+<ul>
+<li>
+<p>This is how it looks when I insepect the closed answer body</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span>    Show Answer
+</span><span>    </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">svg </span><span style="color:#bb80b3;">...</span><span style="color:#5fb3b3;">&gt;</span><span>...</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">svg</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+</li>
+<li>
+<p>This is how it looks when I open the answer</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span>    Show Answer
+</span><span>    </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">svg </span><span style="color:#bb80b3;">...</span><span style="color:#5fb3b3;">&gt;</span><span>...</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">svg</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">p</span><span style="color:#5fb3b3;">&gt;</span><span>Answered over 4 years ago</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">p</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span>    </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span>      </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">p</span><span style="color:#5fb3b3;">&gt;</span><span>You can run </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">code</span><span style="color:#5fb3b3;">&gt;</span><span>man lsof</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">code</span><span style="color:#5fb3b3;">&gt;</span><span> to find out those flags.</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">p</span><span style="color:#5fb3b3;">&gt;
+</span><span>
+</span><span>      </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">p</span><span style="color:#5fb3b3;">&gt;
+</span><span>        -w Enables (+) or disables (-) the suppression of warning messages.
+</span><span>      </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">p</span><span style="color:#5fb3b3;">&gt;
+</span><span>      ...
+</span><span>    </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="explain-to-me-like-i-am-5-not-really-but-you-get-the-point">Explain to me like I am 5 (not really, but you get the point)</h1>
+<p>The point that I am getting at is that till I opened the answers they aren't a part of the document and even when I do open the answers the function to
+add buttons has already finished running. <strong>Hence, the reason there were no buttons is that there were no codeblocks at that time</strong>.</p>
+<h2 id="what-now">What now?</h2>
+<p>So now to solve this problem I had to make the function run at the same time the button is clicked to expand the answer, that should be enough right?</p>
+<p>Nope.</p>
+<p>It didn't work, I figured that this could be due to a delay in adding the answer DOM to the document, but the function started running before. Hence I made the function run after a small delay of 50 miliseconds (I think we can go lower than this).</p>
+<pre data-lang="javascript" style="background-color:#2b2c2f;color:#cccece;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span>  onClick</span><span style="color:#5fb3b3;">={</span><span>() =&gt; {
+</span><span>    </span><span style="color:#6699cc;">setShowAnswer</span><span style="color:#5fb3b3;">(</span><span>!</span><span style="color:#f99157;">showAnswer</span><span style="color:#5fb3b3;">)</span><span>;   </span><span style="color:#5f6364;">// This boolean expands or collapses the answer
+</span><span>    </span><span style="color:#6699cc;">setTimeout</span><span style="color:#5fb3b3;">(</span><span>(</span><span style="color:#5fb3b3;">)</span><span> =&gt; </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#6699cc;">addCopyButtons</span><span>(navigator</span><span style="color:#5fb3b3;">.</span><span>clipboard)</span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#5fb3b3;">}, </span><span style="color:#f99157;">50</span><span>);
+</span><span>  </span><span style="color:#5fb3b3;">}</span><span>}
+</span></code></pre>
+<p>This did what I wanted it to do.</p>
+<h2 id="a-little-bit-of-styling-please">A little bit of styling please</h2>
+<p>Then I wrote a bit of css to do the following:</p>
+<ul>
+<li>To position the button on the top right corner of a codeblock</li>
+<li>Change the colour on hover and while it's active. Nothing special.</li>
+</ul>
+<pre data-lang="css" style="background-color:#2b2c2f;color:#cccece;" class="language-css "><code class="language-css" data-lang="css"><span style="color:#5fb3b3;">.</span><span style="color:#bb80b3;">copy-code-button </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#fac863;">color</span><span style="color:#5fb3b3;">: #272822;
+</span><span>  </span><span style="color:#fac863;">background-color</span><span style="color:#5fb3b3;">: #fff;
+</span><span>  </span><span style="color:#fac863;">border-color</span><span style="color:#5fb3b3;">: #272822;
+</span><span>  </span><span style="color:#fac863;">border</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">2px solid</span><span style="color:#5fb3b3;">;
+</span><span>  </span><span style="color:#fac863;">border-radius</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">3px 3px 0px 0px</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>  </span><span style="color:#fac863;">display</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">block</span><span style="color:#5fb3b3;">;
+</span><span>  </span><span style="color:#fac863;">margin</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">25rem 0rem 0 auto</span><span style="color:#5fb3b3;">;
+</span><span>  </span><span style="color:#fac863;">padding</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">2rem</span><span style="color:#5fb3b3;">;
+</span><span>  </span><span style="color:#fac863;">font-size</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">8em</span><span style="color:#5fb3b3;">;
+</span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span style="color:#5fb3b3;">.</span><span style="color:#bb80b3;">copy-code-button</span><span style="color:#5fb3b3;">:</span><span>hover </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#fac863;">cursor</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">pointer</span><span style="color:#5fb3b3;">;
+</span><span>  </span><span style="color:#fac863;">background-color</span><span style="color:#5fb3b3;">: #f2f2f2;
+</span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span style="color:#5fb3b3;">.</span><span style="color:#bb80b3;">copy-code-button</span><span style="color:#5fb3b3;">:</span><span>focus </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#fac863;">background-color</span><span style="color:#5fb3b3;">: #e6e6e6;
+</span><span>  </span><span style="color:#fac863;">outline</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">;
+</span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span style="color:#5fb3b3;">.</span><span style="color:#bb80b3;">copy-code-button</span><span style="color:#5fb3b3;">:</span><span>active </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#fac863;">background-color</span><span style="color:#5fb3b3;">: #d9d9d9;
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<h1 id="the-result">The Result</h1>
+<p><img src="https://sahil-shubham.in/posts/day2/end_result.png" alt="The Stackoverflow Answer" /></p>
+
+    
+    <div class="social-icons">
+        
+            <a class="social-icons__link" href=mailto:hello@sahil-shubham.in rel="noopener" target="_blank">
+                <svg
+                    class="feather feather-mail"
+                    class="scicon"
+                    fill="none"
+                    height="24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+            </a>
+        
+        
+            <a class="social-icons__link" href=https:&#x2F;&#x2F;github.com&#x2F;sahil-shubham rel="noopener" target="_blank">
+                <svg
+                    class="featherfeather-github"
+                    class="scicon"
+                    fill="none"
+                    height="24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    viewBox="002424"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7
+                        0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                </svg>
+            </a>
+        
+        
+            <a class="social-icons__link" href=https:&#x2F;&#x2F;twitter.com&#x2F;sahil_shubham_ rel="noopener" target="_blank">
+                <svg
+                    class="feather feather-twitter"
+                    class="scicon"
+                    fill="none"
+                    height="24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                </svg>
+            </a>
+        
+        
+            <a class="social-icons__link" href=https:&#x2F;&#x2F;sahil-shubham.in&#x2F;atom.xml rel="noopener" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+            </a>
+        
+        
+    </div>
+
+    
+        <h1>Comments</h1>
+        <script src="https://utteranc.es/client.js"
+            repo="sahil-shubham/sahil-shubham.in"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
+    
+
+  </div>
+  <script
+    src="https://sahil-shubham.in/main.js"
+    type="text/javascript"
+  ></script>
+  
+    <div class="section bottom-menu">
+        <hr/>
+        <p>
+            
+                
+                    <a href="&#x2F;about">about</a>
+                    &#183;
+                
+                    <a href="&#x2F;posts">posts</a>
+                    &#183;
+                
+                    <a href="&#x2F;resume.pdf">resume</a>
+                    &#183;
+                
+            
+            <a href="https:&#x2F;&#x2F;sahil-shubham.in">
+                home
+            </a>
+            &#183;
+            <a href="https:&#x2F;&#x2F;github.com&#x2F;sahil-shubham">
+                github
+            </a>
+            &#183;
+            <a href="https:&#x2F;&#x2F;twitter.com&#x2F;sahil_shubham_">
+                twitter
+            </a>
+            &#183;
+            <a href="https:&#x2F;&#x2F;sahil-shubham.in&#x2F;atom.xml">
+                rss
+            </a>
+        </p>
+                   
+    </div>
+
+</div>
+
+    </body>
+</html>

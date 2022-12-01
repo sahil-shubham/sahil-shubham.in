@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta content="chrome=1" http-equiv="X-UA-Compatible"/>
+        <meta content="True" name="HandheldFriendly"/>
+        <meta content="320" name="MobileOptimized"/>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <meta content="no-referrer" name="referrer"/>
+        
+            <link href='&#x2F;favicons&#x2F;site.webmanifest' rel="manifest"/>
+        
+        
+        
+            <link href='&#x2F;favicons&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png"/>
+        
+        
+            <link href='&#x2F;favicons&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png"/>
+        
+        
+            <link href='&#x2F;favicons&#x2F;apple-touch-icon.png' rel="apple-touch-icon" sizes="180x180"/>
+        
+        <link href="https://sahil-shubham.in/fonts.css" rel="stylesheet"/>
+        <link href="https://sahil-shubham.in/style.css" rel="stylesheet"/>
+        <title>
+            
+    Let&#x27;s Learn About OAuth!
+
+        </title>
+        
+
+        <script async defer data-website-id="9b2dfb9e-f887-4742-8a97-d49a487f5463" src="https://umami.sahil-shubham.in/umami.js"></script>
+    </head>
+    <body>
+        
+<div class="wrap">
+  <script>
+    (function initTheme() {
+      let body = document.getElementsByTagName('body')[0];
+      if (window.localStorage.getItem('theme') !== null) {
+        if (window.localStorage.getItem('theme') === 'dark') {
+          body.setAttribute('data-theme', 'dark');
+        } else {
+          body.setAttribute('data-theme', 'light');
+        }
+      } else {
+        if (
+          window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches
+        ) {
+          body.setAttribute('data-theme', 'dark');
+        }
+      }
+    })();
+  </script>
+  <div class="section">
+    <div class="theme-switcher">
+    <div class="theme-button" onClick="toggleTheme()">
+        <label for="cb1">
+            <svg
+                id="dayIcon"
+                style="enable-background:new 0 0 35 35;"
+                version="1.1"
+                viewBox="0 0 35 35"
+                x="0px"
+                xml:space="preserve"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns="http://www.w3.org/2000/svg"
+                y="0px">
+                <g id="Sun">
+                    <g>
+                        <path
+                            d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5 S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z
+                                M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5
+                                C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6
+                                C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9
+                                c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44
+                                l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5
+                                c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06 L6.439,8.561z
+                                M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z
+                                M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2
+                                C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29
+                                c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7
+                                C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5
+                                c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z"
+                            style="fill-rule:evenodd;clip-rule:evenodd;"/>
+                    </g>
+                </g>
+            </svg>
+        </label>
+        <input class="toggle" id="cb1" onClick="toggleTheme()" type="checkbox"/>
+        <label class="toggle-button" for="cb1"></label>
+        <label for="cb1">
+            <svg
+                enable-background="new 0 0 100 100"
+                id="nightIcon"
+                version="1.1"
+                viewBox="0 0 100 100"
+                x="0px"
+                xml:space="preserve"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns="http://www.w3.org/2000/svg"
+                y="0px">
+                <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571
+                C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23
+                c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369
+                c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65 c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z"/>
+            </svg>
+        </label>
+    </div>
+</div>
+  </div>
+  <div class="section" id="title">
+    
+    Let&#x27;s Learn About OAuth!
+
+
+  </div>
+
+  <div class="section" id="content">
+    
+    
+        <div class="byline">
+            
+                
+    
+    Monday 21 Jun, 2021
+
+            
+            
+                
+                    &#183; 1580 words
+                
+            
+            
+                
+                
+                    &#183; 8 min
+                
+            
+        </div>
+        
+        <hr/>
+    <p>It's been a few weeks since I been implementing OAuth to integrate different kinds of searches for services like <a href="https://getpocket.com/">Pocket</a>, <a href="https://developers.notion.com/">Notion</a> and <a href="https://developers.google.com/drive/api/v3/about-sdk">Drive</a> for <a href="https://neera.ai/">Neera</a>. This is a way of documenting everything I have done/read till now.</p>
+<h2 id="basics-first">Basics First</h2>
+<p>Suppose you want to make an application which searches through drive files and folders for different users. How do you go about giving your application access to a user's files? </p>
+<ul>
+<li>Do you directly ask your user to give their credentials to you? So that you can those to get their files yourself.</li>
+</ul>
+<p>Technically, that would work. But a lot of people wouldn't give you their credentials, if not all. </p>
+<ul>
+<li>Or you can ask the user to give a limited access to their files, through which the application can interact with Drive on your behalf. This would only involve the user proving their identity to Google without sharing any credentials to you. </li>
+</ul>
+<p>This is what OAuth does. It is the <strong>authorization of two services</strong> so that they can interact on their own, on preset terms which the user agrees to. </p>
+<p>OAuth stands for Open Authorization. It's a process through which an application or website can access private data from another website without having to make the user give any kind of sensitive information to third party websites.</p>
+<p>This is also the process you go through when you choose to sign up with your Google or Facebook account while signing up for something else. Just remember how you get redirected to a familiar login when signing up, after which you get back to where you started. </p>
+<h2 id="history-second">History Second</h2>
+<p>The idea behind OAuth began in November 2006, when few engineers met to discuss about Twitter OpenID and Ma.gnolia APIs. They concluded that there were no open standards for API access delegation. </p>
+<p>Later an OAuth discussion group was created, which was joined by multiple people who coordinated the contributions creating a more formal specification. </p>
+<p>All of these efforts led to further standardization and hence on 2010, OAuth 1.0 protocol was published and later OAuth 2.0, which we use today and would mostly discuss, was published in 2012. </p>
+<h2 id="terminology-third">Terminology Third</h2>
+<ul>
+<li><strong>User</strong>: The user is who authorizes an application to access their account. </li>
+<li><strong>Client</strong>: The client is the application that's trying to access the user's account. </li>
+<li><strong>Scope</strong>: It specifies the level of access that the application is requesting form the client. The application's access to the user's account is limited to the scope of authorization granted (eg. read or write access)</li>
+<li><strong>Resource Server</strong>: This is the server which contains all the resources. It only returns data to authenticated requests. </li>
+<li><strong>Authorization Server</strong>: This server validates the user's credentials and redirects the user to the consent screen, which is the place the user is informed about the scopes the client application is requesting. On acceptance, the user is redirected back to to client with an access token. </li>
+<li><strong>Access Token</strong>: This is token which is given after the OAuth is completed by a user. This token should be present in every request made by the client, and it is the way the resource server confirms that the authorization has taken place.</li>
+<li><strong>Redirect URI</strong>: This is where you would be redirect to once the user accepts everything in the consent screen or when the OAuth is completed.</li>
+</ul>
+<h2 id="it-s-authorization-time">It's Authorization Time</h2>
+<p>The OAuth workflow may look complicated, hence let's divide the whole process into steps and analyze each step. I tried making a flowchart to explain the whole process. </p>
+<p><img src="https://sahil-shubham.in/posts/oauth/oauth-flow.png" alt="OAuth Flow" /></p>
+<h3 id="but-wait">But, wait</h3>
+<p>Before you can begin the OAuth process in your application, you must register it with the service. Few examples of this service can be Drive, Notion and Pocket. </p>
+<p>This is necessary as it tells the company about your application. Usually, you would be required to give information such as application name, website, a logo etc. You would also be required to tell the redirect uri(s), scope(s) etc. </p>
+<ol>
+<li>This step mostly involves the user clicking on a button which has a link with the following parameters: </li>
+</ol>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>https://authorization-server.com/auth?response_type=code&amp;client_id=CLIENT_ID&amp;redirect_uri=REDIRECT_URI&amp;scope=read
+</span></code></pre>
+<ul>
+<li><strong>response_type=code</strong>: This indicates to the authorization server that your server expects to receive an authorization code/access token.</li>
+<li><strong>client_id</strong>: This a code that you get when you first create an application</li>
+<li><strong>scope</strong>: One or more scopes</li>
+</ul>
+<ol start="2">
+<li>When redirected to this page, you would be welcomed by the login screen which later would take you to the consent screen. If you are already logged in, you would be seeing the consent screen directly.</li>
+<li>Once given the client application is given the permission, the user would be redirected back to the redirect URI with a code. This is where we put a &quot;middle screen&quot; which I named callback. </li>
+<li>This is the screen where you tell the user that you are redirecting them back to the place they started, but you are also sending a request back to the authorization server with the code. This request is made to get the access token. </li>
+<li>Once the above request is successful, the user is redirected back to the where you want, and this time with the access token. This access token needs to be attached to the headers or as query parameter of all the future requests from the client to the resource server.</li>
+</ol>
+<h2 id="a-few-differences">A Few differences</h2>
+<p>The access token is generally supposed to be valid for a limited time, this brings the question of what to do when the access token expires? </p>
+<p>Rather than going through the whole process of authorization once again, the client also receives a token called <strong>refresh_token</strong>, this token is mostly sent only for the first time an OAuth is done and needs to stored. </p>
+<p>When there is a limited life to access tokens, the client needs to send the refresh token with the access token to handle the case when the access token is expired. The resource server then &quot;refreshes&quot; the access token and uses the same for the original request. </p>
+<p>Among the three services I have been working with, drive is the only one which sends an access token with a limited life. </p>
+<h1 id="bonus-section">Bonus Section</h1>
+<h2 id="pocket-authorization-differences">Pocket authorization differences</h2>
+<p>Pocket's <a href="https://getpocket.com/developer/">developer docs</a> mention that </p>
+<blockquote>
+<p>&quot;The Pocket Authentication API uses a <strong>variant</strong> of OAuth 2.0 for authentication&quot;. </p>
+</blockquote>
+<p>The word &quot;variant&quot; is important here. For making an application which uses an user's pocket's data, you first have to obtain a <strong>request token</strong> which is added as a parameter in the link of the button you click in step 1.  After accepting on the consent screen, you are once again given a code and redirect to your callback screen through which you get your access token. </p>
+<h2 id="oauth-1-0-vs-oauth-2-0">OAuth 1.0 vs OAuth 2.0</h2>
+<p>The differences between the two types of OAuth was one the first questions that popped in my mind when I read that OAuth 2.0 is a complete rewrite of OAuth 1.0. I will try to go over few of the differences.</p>
+<h3 id="support-for-non-browser-based-applications">Support for non-browser based applications</h3>
+<p>OAuth 1.0 had a lack of support for non-browser based clients. But, OAuth 2.0 used a different flow for authorizing a client which made it easier/possible for non-browser clients. This was on the of main advantages of OAuth 2.0 over OAuth 1.0.</p>
+<h3 id="ease-of-implementation">Ease of Implementation</h3>
+<p>OAuth 1.0 was often criticized for the barrier it posed to writing a client. There is a shared secret that is used to sign the arguments for the authorization request by the client, which also need to be passed in the exact order. </p>
+<p>OAuth 2.0 got rid of all signatures and cryptography at the protocol level, so as to rely solely on TLS. People did bring up concerns regarding the same, mentioning reasons such as yet-undiscovered zero-day TLS vulnerabilities which can potentially comprise the entire system.</p>
+<h3 id="so-what-does-the-above-mean">So what does the above mean?</h3>
+<p>All of the above doesn't mean that OAuth 1.0 is obsolete and that everyone should to move to OAuth 2.0. There are still a lot of companies which continue using OAuth 1.0 or a variant of it (OAuth1.0a for Twitter). </p>
+<p>OAuth 2.0 is also not necessarily more secure than OAuth 1.0, there are a lot of things which much be checked when working with OAuth 2.0 to prevent any harm to security. Like making sure the redirect URI is validated, and that access tokens don't end up in the browser history. There is also a <a href="https://tools.ietf.org/id/draft-ietf-oauth-security-topics-10.html">document by IETF for best current practices for OAuth 2.0 security</a>.</p>
+<p>I also landed about <a href="https://gist.github.com/nckroy/dd2d4dfc86f7d13045ad715377b6a48f">an article by one the the original authors of OAuth 2.0,  Eran Hammer</a>, in which mentioned a lot of flaws of the system compared to OAuth 1.0 which led to him withdrawing his name from the specification. He mentions his concerns in the end by writing: </p>
+<blockquote>
+<p>&quot;I think the OAuth brand is in decline. This framework will live for a  while, and given the lack of alternatives, it will gain widespread  adoption. But we are also  <strong>likely to see major security failures in the next couple of years</strong>  and the slow but steady devaluation of the brand. It will be another hated protocol you are stuck with.&quot;</p>
+</blockquote>
+<p>But he also mentions that</p>
+<blockquote>
+<p>&quot;OAuth 2.0 at the hand of a developer with deep understanding of web security will likely result is a secure implementation&quot;</p>
+</blockquote>
+
+    
+    <div class="social-icons">
+        
+            <a class="social-icons__link" href=mailto:hello@sahil-shubham.in rel="noopener" target="_blank">
+                <svg
+                    class="feather feather-mail"
+                    class="scicon"
+                    fill="none"
+                    height="24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+            </a>
+        
+        
+            <a class="social-icons__link" href=https:&#x2F;&#x2F;github.com&#x2F;sahil-shubham rel="noopener" target="_blank">
+                <svg
+                    class="featherfeather-github"
+                    class="scicon"
+                    fill="none"
+                    height="24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    viewBox="002424"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7
+                        0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                </svg>
+            </a>
+        
+        
+            <a class="social-icons__link" href=https:&#x2F;&#x2F;twitter.com&#x2F;sahil_shubham_ rel="noopener" target="_blank">
+                <svg
+                    class="feather feather-twitter"
+                    class="scicon"
+                    fill="none"
+                    height="24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                </svg>
+            </a>
+        
+        
+            <a class="social-icons__link" href=https:&#x2F;&#x2F;sahil-shubham.in&#x2F;atom.xml rel="noopener" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+            </a>
+        
+        
+    </div>
+
+    
+        <h1>Comments</h1>
+        <script src="https://utteranc.es/client.js"
+            repo="sahil-shubham/sahil-shubham.in"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
+    
+
+  </div>
+  <script
+    src="https://sahil-shubham.in/main.js"
+    type="text/javascript"
+  ></script>
+  
+    <div class="section bottom-menu">
+        <hr/>
+        <p>
+            
+                
+                    <a href="&#x2F;about">about</a>
+                    &#183;
+                
+                    <a href="&#x2F;posts">posts</a>
+                    &#183;
+                
+                    <a href="&#x2F;resume.pdf">resume</a>
+                    &#183;
+                
+            
+            <a href="https:&#x2F;&#x2F;sahil-shubham.in">
+                home
+            </a>
+            &#183;
+            <a href="https:&#x2F;&#x2F;github.com&#x2F;sahil-shubham">
+                github
+            </a>
+            &#183;
+            <a href="https:&#x2F;&#x2F;twitter.com&#x2F;sahil_shubham_">
+                twitter
+            </a>
+            &#183;
+            <a href="https:&#x2F;&#x2F;sahil-shubham.in&#x2F;atom.xml">
+                rss
+            </a>
+        </p>
+                   
+    </div>
+
+</div>
+
+    </body>
+</html>

@@ -1,0 +1,1027 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>Sahil Shubham</title>
+	<link href="https://sahil-shubham.in/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://sahil-shubham.in"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-08-13T00:00:00+00:00</updated>
+	<id>https://sahil-shubham.in/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Day-14, LocalStorage needs to kept in check</title>
+		<published>2021-08-13T00:00:00+00:00</published>
+		<updated>2021-08-13T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/day14/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/day14/</id>
+		<content type="html">&lt;p&gt;I like localStorage. It has always been the goto place whenever I needed to store anything easily and&#x2F;or momentarily. Sometimes as a check for first time visitors, or sometimes as a &lt;strong&gt;low grade&lt;&#x2F;strong&gt; state managment or sometimes when I don&#x27;t want to ask the server for something frequently.&lt;&#x2F;p&gt;
+&lt;p&gt;This blogpost is about an unexpected issue I ran into while optimizing the search results speed on Neera.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;preface&quot;&gt;Preface&lt;&#x2F;h1&gt;
+&lt;p&gt;Neera offers custom profiles which make searching through particular websites, or personal documents easier. Anyone can make any number of personalized tabs to shift through different sources quickly to filter search results. One just need to signUp on Neera. But this wasn&#x27;t how it always was.&lt;&#x2F;p&gt;
+&lt;p&gt;During the early stages of Neera, profiles weren&#x27;t customizable and were same for everyone. These were set on the first visit and were stored in the localStorage from where they were later taken from. We later implemented signUp on our platform which changed the workflow of getting a result to the following:&lt;&#x2F;p&gt;
+&lt;p&gt;(Let&#x27;s assume Neera is the default search engine)&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;You enter a query directly in address bar&lt;&#x2F;li&gt;
+&lt;li&gt;We send a request to backend asking for profiles&lt;&#x2F;li&gt;
+&lt;li&gt;It checks if any cookies are attached to the request which determine whether the user is logged in or not&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;ul&gt;
+&lt;li&gt;If they are logged in, backend sends another request to the database (&lt;a href=&quot;https:&#x2F;&#x2F;app.supabase.io&quot;&gt;Supabase&lt;&#x2F;a&gt; here) and sends back the response&lt;&#x2F;li&gt;
+&lt;li&gt;If they aren&#x27;t logged in, backend sends the default profiles which is an object stored in backend&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;ol start=&quot;4&quot;&gt;
+&lt;li&gt;Once the frontend receives the profiles, it sets them as the state and a selected profile and tab state are set (this is the profile&#x2F;tab that query is initially searched in)&lt;&#x2F;li&gt;
+&lt;li&gt;Now it sends a request to the backend with the query and the selected tab and profile which lets it know what results it should filter or API should it use (in some cases we use a service specific API rather than filtering search results by domain, e.g. GitHub)&lt;&#x2F;li&gt;
+&lt;li&gt;The backend uses Google&#x2F;Bing API and send back the results which are later rendered&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;As you can see, there is a lot happening. Our searches were better but they would always be slower than other search engines because they start their process at step 5.&lt;&#x2F;p&gt;
+&lt;p&gt;I wanted us to have a middle ground and hence tried to keep the profiles client side itself, because they would only change when an user modifies them at which point I would update them in both the backend and frontend. This would help in getting us directly at step 4. Decreasing 1-2 request calls.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;the-issue&quot;&gt;The issue&lt;&#x2F;h1&gt;
+&lt;p&gt;I implemented the above and tested cases where&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;someone could be opening the website for the first time,&lt;&#x2F;li&gt;
+&lt;li&gt;or multiple times,&lt;&#x2F;li&gt;
+&lt;li&gt;or how it looks on network throttling&lt;&#x2F;li&gt;
+&lt;li&gt;or if the profiles were present in localStorage but empty.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Everything seemed fine.&lt;&#x2F;p&gt;
+&lt;p&gt;Pushed and deployed, happy with the results we continued with other work for the next few weeks. Only to be contacted by one of the first users who had trouble opening the site which they hadn&#x27;t since a few months.&lt;&#x2F;p&gt;
+&lt;p&gt;Fortunately for us, they attached the screenshot with their console open (We need more people like this). Somehow the profiles were undefined, but I had implemented a check for this.&lt;&#x2F;p&gt;
+&lt;p&gt;Did I make a mistake? Umm, most probably. Better question would be, what mistake did we do?&lt;&#x2F;p&gt;
+&lt;p&gt;Remember how I mentioned Neera didn&#x27;t use to have user logins and depended on localStorage for profiles? Well coincidentally I stored profiles in the same key name we used to, but in a different format ofcourse, as things have changed. Technically the user above did have the profiles but in a different format :|&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;how-to-fix-it-and-did-we-do&quot;&gt;How to fix it? and did we do?&lt;&#x2F;h1&gt;
+&lt;p&gt;We looked at our options:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;We can have a version key value pair in anything we are storing so that we can compare if the schema&#x2F;structre of something is old or new&lt;&#x2F;li&gt;
+&lt;li&gt;On new reloads we can delete and set profiles, this would remove everything old and new and start afresh&lt;&#x2F;li&gt;
+&lt;li&gt;Cookies are good in this case, as one can set their expiry&lt;&#x2F;li&gt;
+&lt;li&gt;We can change the keyname for storing profiles&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;We went with the last option, as it requires less work as well as less uncertainty about whether they would work in every case.&lt;&#x2F;p&gt;
+&lt;p&gt;If one is constantly dependant on localStorage for their needs. They need to keep a check on it. So that no user whether old or new faces any issue with a new feature implementation. We were fairly lucky because of an user informing us, but there can be other users who never got to see how far everything has come due to this.&lt;&#x2F;p&gt;
+&lt;p&gt;Anyways, every cloud has a silver lining :)&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day14&#x2F;trade_offer.jpg&quot; alt=&quot;trade offer&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Day-12, Things learned after spending time with docker</title>
+		<published>2021-08-11T00:00:00+00:00</published>
+		<updated>2021-08-11T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/day12/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/day12/</id>
+		<content type="html">&lt;h1 id=&quot;preface&quot;&gt;Preface&lt;&#x2F;h1&gt;
+&lt;p&gt;I been spending time learning about docker and trying to dockerize a project. These are some points&#x2F;tips that I didn&#x27;t find explained properly in a lot of guides and articles. Got to know most of these from &lt;a href=&quot;https:&#x2F;&#x2F;mukul-mehta.in&quot;&gt;Mukul Mehta&lt;&#x2F;a&gt; (don&#x27;t be surprised if you find his blog theme similar to mine, it was the other way around).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;expose-isn-t-exposing&quot;&gt;EXPOSE isn&#x27;t exposing&lt;&#x2F;h2&gt;
+&lt;p&gt;One thing that I realized after reading a few articles was how much people mix up the EXPOSE instruction. Some writers tend to overuse the word expose which makes beginners feel as if just writing &lt;code&gt;EXPOSE 80&lt;&#x2F;code&gt; &amp;quot;exposes&amp;quot; the port, which makes someone think that they can now connect to port 80 of the container from outside. But it doesn&#x27;t.&lt;&#x2F;p&gt;
+&lt;p&gt;EXPOSE is mainly a way of documenting in a dockerfile. The better term would be &amp;quot;publishing&amp;quot; a port. The &lt;code&gt;-p&lt;&#x2F;code&gt; flag added while running a container is to publish or bind an exposed port to any port of the host machine. Most of the times, while running a container we tend to &amp;quot;map&amp;quot; the published ports to a specific port.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;docker run&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt; -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;p&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt; 8000:80 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;image_name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Running this command publishes port 80 of the container and maps it to port 8000 of the host machine.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;docker-buildkit&quot;&gt;DOCKER BUILDKIT&lt;&#x2F;h2&gt;
+&lt;p&gt;Building images takes time. A lot of time.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day12&#x2F;docker_wait.jpg&quot; alt=&quot;docker_wait&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;moby&#x2F;buildkit&quot;&gt;Docker Buildkit&lt;&#x2F;a&gt; has been a recent addition (&lt;a href=&quot;https:&#x2F;&#x2F;blog.mobyproject.org&#x2F;introducing-buildkit-17e056cc5317&quot;&gt;2017 blog introducing it&lt;&#x2F;a&gt;) and is something which can be used to reduce the build times.&lt;&#x2F;p&gt;
+&lt;p&gt;They mention the following as their key features on their repository:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Automatic garbage collection&lt;&#x2F;li&gt;
+&lt;li&gt;Extendable frontend formats&lt;&#x2F;li&gt;
+&lt;li&gt;Concurrent dependency resolution&lt;&#x2F;li&gt;
+&lt;li&gt;Efficient instruction caching&lt;&#x2F;li&gt;
+&lt;li&gt;Build cache import&#x2F;export&lt;&#x2F;li&gt;
+&lt;li&gt;Nested build job invocations&lt;&#x2F;li&gt;
+&lt;li&gt;Distributable workers&lt;&#x2F;li&gt;
+&lt;li&gt;Multiple output formats&lt;&#x2F;li&gt;
+&lt;li&gt;Pluggable architecture&lt;&#x2F;li&gt;
+&lt;li&gt;Execution without root privileges&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;You can use it by adding &lt;code&gt;DOCKER_BUILDKIT=1&lt;&#x2F;code&gt; in your docker build command. I didn&#x27;t find any articles checking how much time it saves due the features mentioned above, hence I would it myself someday.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;get-good-at-organizing-layers&quot;&gt;Get good at organizing layers&lt;&#x2F;h2&gt;
+&lt;p&gt;The key to writing good dockerfiles is to position intructions with frequent changes as low as possible. What this means if I have the following dockerfile:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;Dockerfile&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-Dockerfile &quot;&gt;&lt;code class=&quot;language-Dockerfile&quot; data-lang=&quot;Dockerfile&quot;&gt;&lt;span&gt;  FROM node:14
+&lt;&#x2F;span&gt;&lt;span&gt;  WORKDIR &#x2F;project
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  COPY package.json .
+&lt;&#x2F;span&gt;&lt;span&gt;  COPY yarn.lock .
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  RUN yarn install
+&lt;&#x2F;span&gt;&lt;span&gt;  RUN yarn build-app
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  COPY docker&#x2F;start.sh .
+&lt;&#x2F;span&gt;&lt;span&gt;  RUN chmod +x start.sh
+&lt;&#x2F;span&gt;&lt;span&gt;  EXPOSE 80
+&lt;&#x2F;span&gt;&lt;span&gt;  ENTRYPOINT [ &amp;quot;.&#x2F;start.sh&amp;quot; ]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And I make any changes to the &lt;code&gt;start.sh&lt;&#x2F;code&gt; script and make a build again, docker uses the cache from previos build and rather than going through the whole process of installing all the packages it starts from &lt;code&gt;COPY docker&#x2F;start.sh&lt;&#x2F;code&gt;. The opposite would have happened if I had copied the script above &lt;code&gt;RUN yarn install&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Docker layers are stacked on top of each other and they are all read-only, with the exception of the topmost, writable layer. Each instruction is a separate layer, hence it&#x27;s good to combine commands using something like &lt;code&gt;&amp;amp;&amp;amp;&lt;&#x2F;code&gt; or putting them inside a script and running that instead. The layers for the above dockerfile can be represented like this:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day12&#x2F;layers.png&quot; alt=&quot;Dockerfile layers&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Making a change in any layer would make docker build start from that layer to the top.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;tip-no-need-to-write-the-complete-image-id&quot;&gt;[TIP] No need to write the complete image id&lt;&#x2F;h2&gt;
+&lt;p&gt;Stopping a container would be done very frequently while development. To see what containers are running you run:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;docker ps
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This prints out an output similar to below:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;CONTAINER ID   IMAGE          COMMAND        CREATED       STATUS       PORTS                  NAMES
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;22528c8e2d2b   neera:latest   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;.&#x2F;start.sh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;   2 hours ago   Up 2 hours   0.0.0.0:8000-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;80&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;&#x2F;tcp   laughing_williams
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;After which I used to copy the container id and paste it in the command:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;docker stop &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;container_id&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Turns out if there aren&#x27;t anything with similar id all one can do is write the first 1-2 letters of the id in docker stop and it does the same thing.&lt;&#x2F;p&gt;
+&lt;p&gt;Hence, writing &lt;code&gt;docker stop 22528c8e2d2b&lt;&#x2F;code&gt; and &lt;code&gt;docker stop 22&lt;&#x2F;code&gt; does the same thing, till there are no other containers starting with 22. Can&#x27;t believe I am saying this but&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;txt&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-txt &quot;&gt;&lt;code class=&quot;language-txt&quot; data-lang=&quot;txt&quot;&gt;&lt;span&gt;  Life is too short to write full container ids
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;refrences-interesting-reads&quot;&gt;Refrences&#x2F;Interesting Reads&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.learncloudnative.com&#x2F;blog&#x2F;2020-04-29-beginners-guide-to-docker?utm_source=pocket_mylist&quot;&gt;Beginners guide to Docker&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;stackoverflow.com&#x2F;questions&#x2F;30137135&#x2F;confused-about-docker-t-option-to-allocate-a-pseudo-tty?utm_source=pocket_mylist&quot;&gt;Docker -t flag &#x2F; pseduo-TTY&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;moby&#x2F;moby&#x2F;blob&#x2F;master&#x2F;pkg&#x2F;namesgenerator&#x2F;names-generator.go&quot;&gt;Container names generator function&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;jvns.ca&#x2F;blog&#x2F;2016&#x2F;10&#x2F;10&#x2F;what-even-is-a-container&#x2F;?utm_source=pocket_mylist&quot;&gt;What even is a container&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Day-7, Quality vs Quantity Writing</title>
+		<published>2021-08-06T00:00:00+00:00</published>
+		<updated>2021-08-06T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/day7/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/day7/</id>
+		<content type="html">&lt;p&gt;It&#x27;s been a few days since I started with 100 Days of Writing, having a hard time with it but that&#x27;s not something unexpected. What I want to talk about today is being a quality writer vs a quantity writer or similarly being a good writer vs a bad writer.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;preface&quot;&gt;Preface&lt;&#x2F;h1&gt;
+&lt;p&gt;I read &lt;a href=&quot;https:&#x2F;&#x2F;goinswriter.com&#x2F;the-difference-between-good-writers-and-bad-writers-2&#x2F;&quot;&gt;this&lt;&#x2F;a&gt; article about the difference between good and bad writers.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Good writers practice. They take time to write, crafting and editing a piece until it&#x27;s just right. They spend hours and days, just revising.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Good writers spend time, a lot of time on thinking what to write on, writing a first draft of it, accepting that the first draft is horrendous but continuing to edit it &lt;em&gt;&amp;quot;until it&#x27;s just right&amp;quot;&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Am I a bad writer?&lt;&#x2F;p&gt;
+&lt;p&gt;Of course, no doubt.&lt;&#x2F;p&gt;
+&lt;p&gt;Do I want to be better at it?&lt;&#x2F;p&gt;
+&lt;p&gt;Yep.&lt;&#x2F;p&gt;
+&lt;p&gt;Then why do I force myself to write something everyday, something that&#x27;s so full of spelling and gramatical mistakes, something that has really long and hard to understand sentences when I can spend more time per article? Because I want to change.&lt;&#x2F;p&gt;
+&lt;p&gt;This isn&#x27;t going to be motivational in any way. But from my perspective, getting from a person who doesn&#x27;t write to someone who writes beautifully is way harder than changing from a quantity writer to a quality writer.&lt;&#x2F;p&gt;
+&lt;p&gt;Quality is hard to manage when you have to write something everyday, but so is quantity. The above article says this about bad writers:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Bad writers don&#x27;t understand this, which is precisely what makes them bad writers. They presume their writing has achieved a certain level of excellence, so they are often closed off to editing or rewriting. They can seem haughty, prideful, and arrogant.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;I don&#x27;t know anyone who does that, this seems more of an ego issue that has translated to the habit of writing.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;who-are-the-bad-writers-then&quot;&gt;Who are the bad writers then?&lt;&#x2F;h2&gt;
+&lt;p&gt;Effort can be shown in multitude of ways and in almost everything you do. Who is a bad writer depends on what they write for and for whow?&lt;&#x2F;p&gt;
+&lt;p&gt;If you write to teach people a concept, go the extra effort and make it as understandable as possible.&lt;&#x2F;p&gt;
+&lt;p&gt;If you write to calm your mind, write regularly and write till your heart&#x27;s content.&lt;&#x2F;p&gt;
+&lt;p&gt;The one who has stopped putting the effort they used to, are bad writers. But there&#x27;s no necessity of dividing every writer into groups.&lt;&#x2F;p&gt;
+&lt;p&gt;You don&#x27;t have to use big words that no one uses in daily life to be a good writer, just &lt;a href=&quot;http:&#x2F;&#x2F;www.paulgraham.com&#x2F;talk.html&quot;&gt;write like you talk&lt;&#x2F;a&gt;. But that doesn&#x27;t mean you should stop going the extra effort to organize and form you thoughts before writing. &lt;a href=&quot;https:&#x2F;&#x2F;rakaar.github.io&#x2F;posts&#x2F;2021-08-08-rules-for-writing&#x2F;?utm_source=pocket_mylist&quot;&gt;You should bother learning the &amp;quot;rules&amp;quot; for &amp;quot;good&amp;quot; writing&lt;&#x2F;a&gt;:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A good written piece has to convey the ideas of the writer to a reader fully. Writing that doesn’t do that is equivalent of expressing love to your lover in a language she&#x2F;he doesn’t understand.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;That&#x27;s all. By the way, I resonated a lot with &lt;a href=&quot;http:&#x2F;&#x2F;www.shubhro.com&#x2F;2014&#x2F;12&#x2F;27&#x2F;software-engineers-should-write&#x2F;&quot;&gt;this article&lt;&#x2F;a&gt;, the mention of how everyone used to be divided into being &amp;quot;math kids&amp;quot; and &amp;quot;english kids&amp;quot; in schools was nostalgic.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Day-6, Writing a list of what you don&#x27;t know</title>
+		<published>2021-08-05T00:00:00+00:00</published>
+		<updated>2021-08-05T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/day6/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/day6/</id>
+		<content type="html">&lt;p&gt;I am always interested in knowing what things I don&#x27;t know about, everything isn&#x27;t supposed to learnt immediately, if ever. But knowing what you don&#x27;t know is something I find important.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;how&quot;&gt;How?&lt;&#x2F;h2&gt;
+&lt;p&gt;I never sat down and made a list and used to keep everything in mind. I think it&#x27;s better that I realize that I also don&#x27;t know how to remember things :p&lt;&#x2F;p&gt;
+&lt;p&gt;Hence, because of this being the first time I was making a list, I just didn&#x27;t know where to start and how in depth I should go into something before marking it as something I am good at.&lt;&#x2F;p&gt;
+&lt;p&gt;I spent ample amount of time thinking but was only on my way on getting into an &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Analysis_paralysis&quot;&gt;analysis paralysis&lt;&#x2F;a&gt;, so I ended up looking at &lt;a href=&quot;https:&#x2F;&#x2F;roadmap.sh&quot;&gt;roadmap.sh&lt;&#x2F;a&gt; as a checklist. I am assuming that it&#x27;s a good enough list just based on how many stars it has on GitHub (~168k).&lt;&#x2F;p&gt;
+&lt;p&gt;Also, I wouldn&#x27;t say that I don&#x27;t know few of the things I have kept unmarked, but have kept them unmarked so that I end up looking into those once again. It has been long time since I used&#x2F;learned them and hence think that I would explore them in more depth if done now.&lt;&#x2F;p&gt;
+&lt;p&gt;The three questions that need to be answered here are:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Things I am good at&lt;&#x2F;li&gt;
+&lt;li&gt;Things I want to get better at&lt;&#x2F;li&gt;
+&lt;li&gt;What is my training plan for this?&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;I am combining question 1 and 2 for now, but would try to answer them separately next time. I have set a calendar event for 5th September to look back at this.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;things-i-am-good-at-things-i-want-to-get-better-at&quot;&gt;Things I am good at &amp;amp; Things I want to get better at&lt;&#x2F;h1&gt;
+&lt;pre style=&quot;background-color:#2b2c2f;color:#cccece;&quot;&gt;&lt;code&gt;&lt;span&gt;##  Front-end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Internet
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] How does the internet work?
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] What is HTTP?
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Browsers and how they work?
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] DNS and how it works?
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] What is Domain Name?
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] What is hosting?
+&lt;&#x2F;span&gt;&lt;span&gt;- HTML
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Learn the basics
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Writing Semantic HTML
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Forms and Validations
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Conventions and Best Practices
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Accessibility
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] SEO Basics
+&lt;&#x2F;span&gt;&lt;span&gt;- CSS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Learn the basics
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Floats
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Positioning
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Display
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Box Model
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] CSS Grid
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Flex Box
+&lt;&#x2F;span&gt;&lt;span&gt;- JavaScript
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Syntax and Basic Constructs
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Learn DOM Manipulation
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Learn Fetch API &#x2F; Ajax (XHR)
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] ES 6+ and modular JavaScript
+&lt;&#x2F;span&gt;&lt;span&gt;- CSS Architecture
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] BEM
+&lt;&#x2F;span&gt;&lt;span&gt;- CSS Preprocessors
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Sass
+&lt;&#x2F;span&gt;&lt;span&gt;- Module Bundlers
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Webpack
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Rollup
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Parcel
+&lt;&#x2F;span&gt;&lt;span&gt;- Pick a Framework
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] React
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Angular
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Vue.js
+&lt;&#x2F;span&gt;&lt;span&gt;- Web Components
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] HTML Templates
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Custom Elements
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Shadow DOM
+&lt;&#x2F;span&gt;&lt;span&gt;- CSS Frameworks
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Material UI
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Tailwind CSS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Bootstrap
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Bulma
+&lt;&#x2F;span&gt;&lt;span&gt;- Testing your Apps
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Jest
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] react-testing-library
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Cypress
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Enzyme
+&lt;&#x2F;span&gt;&lt;span&gt;- Progressive Web Apps
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Storage
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Web Sockets
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Service Workers
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Location
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Notifications
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Device Orientation
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Payments
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Credentials
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] PRPL Pattern
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] RAIL Model
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Performance Metrics
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Using Lighthouse
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Using DevTools
+&lt;&#x2F;span&gt;&lt;span&gt;- Mobile Applications
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] React Native
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Flutter
+&lt;&#x2F;span&gt;&lt;span&gt;- Static Site Generators
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Next js
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Gatsby js
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Jekyll
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Hugo
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Nuxt js
+&lt;&#x2F;span&gt;&lt;span&gt;- [ ] Web Assembly (WASM)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;## React
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Fundamental Topics
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Create React App
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] JSX
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Components
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Props vs State
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Conditional Rendering
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Component Life Cycle
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] List and Keys
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Composition vs Inheritance
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Basic Hooks
+&lt;&#x2F;span&gt;&lt;span&gt;- Advanced Topics
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Common Hooks
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Writing your own hooks
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Context
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Refs
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Render Props
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Code Splitting
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] High Order Components
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Portals
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Error Boundaries
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Fiber Architecture
+&lt;&#x2F;span&gt;&lt;span&gt;- Ecosystem
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] React Router
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Next.js
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] React Hook Form
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Testing
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] GraphQL
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] State Management using Redux
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Styling using some libraries like Material UI
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] React Native
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;## Backend
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- OS and General Knowledge
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Terminal Usage
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] How Oss work in General
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Process Management
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Threads and Concurrency
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Memory Management
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Interprocess Communication
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] I&#x2F;O Management
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] POSIX Basics
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Basic Networking Concepts
+&lt;&#x2F;span&gt;&lt;span&gt;- Learn a Language
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Rust
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Go
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] JavaScript
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Python
+&lt;&#x2F;span&gt;&lt;span&gt;- Relational Databases
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] PostgreSQL
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] MySQL
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] MariaDB
+&lt;&#x2F;span&gt;&lt;span&gt;- NoSQL Databases
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] MongoDB
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] DynamoDB
+&lt;&#x2F;span&gt;&lt;span&gt;- More about Databases
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] ORMs
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] ACID
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Transactions
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] N+1 Problem
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Database Normalization
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Indexes and how they work
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Data Replication
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Sharding Strategies
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] CAP Theorem
+&lt;&#x2F;span&gt;&lt;span&gt;- Learn about APIs
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] REST
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] JSON APIs
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] SOAP
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] HATEOAS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Open API Spec and Swagger
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Authentication
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Cookie Based
+&lt;&#x2F;span&gt;&lt;span&gt;    - [x] OAuth
+&lt;&#x2F;span&gt;&lt;span&gt;    - [x] Basic Authentication
+&lt;&#x2F;span&gt;&lt;span&gt;    - [x] Token  Authetication
+&lt;&#x2F;span&gt;&lt;span&gt;    - [x] JWT
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] OpenID
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] SAML
+&lt;&#x2F;span&gt;&lt;span&gt;- Caching
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] CDN
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Server Side
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Redis
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Memcached
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Client Side
+&lt;&#x2F;span&gt;&lt;span&gt;- Web Security Knowledge
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] MD5 and why not to use it
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] SHA family
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] scrypt
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] bcrypt
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] HTTPS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] CORS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Content Security Policy
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] SSL&#x2F;TLS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] OWASP Security Risks
+&lt;&#x2F;span&gt;&lt;span&gt;- Testing
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Integration Testing
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Unit Testing
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Functional Testing
+&lt;&#x2F;span&gt;&lt;span&gt;- Design and Development Principles
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] GOF Design Patterns
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Domain Driven Design
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Test Driven Development
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] SOLID
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] KISS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] YAGNI
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] DRY
+&lt;&#x2F;span&gt;&lt;span&gt;- Architectural Patterns
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Monolithic Apps
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Microservices
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] SOA
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] CQRS and Event Sourcing
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Severless
+&lt;&#x2F;span&gt;&lt;span&gt;- Search Engines
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Elasticsearch
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Solr
+&lt;&#x2F;span&gt;&lt;span&gt;- Message Brokers
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Kafka
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] RabbitMQ
+&lt;&#x2F;span&gt;&lt;span&gt;- Containerization vs Virtualization
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Docker
+&lt;&#x2F;span&gt;&lt;span&gt;- GraphQL
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Apollo
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Relay Modern
+&lt;&#x2F;span&gt;&lt;span&gt;- Graph Databases
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Neo4j
+&lt;&#x2F;span&gt;&lt;span&gt;- WebSockets
+&lt;&#x2F;span&gt;&lt;span&gt;- Web Servers
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Nginx
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Apache
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Caddy
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] MS ISS
+&lt;&#x2F;span&gt;&lt;span&gt;- Building for Scale
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Understand the Difference
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Instrumentation
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Monitoring
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Telemetry
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Migration Strategies
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Horizontal vs Vertical Scaling
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Building with Observability in mind
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;##  DevOps
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Understand different OS Concepts
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Process Management
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Threads and Concurrency
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Sockets
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] POSIX Basics
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Networking Concepts
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Startup Management (intid)
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] I&#x2F;O Managment
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Virtualization
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Memory&#x2F;Storage
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] File Systems
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Service Management (systemd)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Learn to live in terminal
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] terminal multiplexers
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] scree
+&lt;&#x2F;span&gt;&lt;span&gt;    - [x] tmux
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Learn Bash Scripting
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Vim&#x2F;Nano&#x2F;PowerShell&#x2F;Emacs
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Text Manipulation tools
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Process Monitoring
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Network
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] System Performance
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Others
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Networking, Security and Protocols
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] HTTP
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] HTTPS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] FTP
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] SSL&#x2F;TLS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] SSH
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Port Forwarding
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Emails
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] SMTP
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] IMAPS
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] POP3S
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] DMARC
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] SPF
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Domain Keys
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- What is and whow to setup a _______
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Reverse Proxy
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Caching Server
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Forward Proxy
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Load Balancer
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Firewall
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Web Server
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] IIS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Nginx
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Apache
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Tomcat
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Caddy
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Learn Infrastucture as Code
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Containers
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Docker
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Configuration Managment
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Ansible
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Container Orchestration
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Kubernetes
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Infrastructure Provisioning
+&lt;&#x2F;span&gt;&lt;span&gt;    - [ ] Terraform
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Learn some CI&#x2F;CD tool
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Github CI
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Jenkins
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] GitHub Actions
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Travis CI
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Circle CI
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Infrastructure Monitoring
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Prometheus
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Grafana
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Application Monitoring
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Jaeger
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] New Relix
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Logs Management
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Elastic Stack
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Papertrail
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Cloud Providers
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] AWS
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Google Cloud
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Azure
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Heroku
+&lt;&#x2F;span&gt;&lt;span&gt;  - [x] Digital Ocean
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;- Cloud Design Patterns
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Availability
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Data Management
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Design and Implementation
+&lt;&#x2F;span&gt;&lt;span&gt;  - [ ] Management and Monitoring
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h1 id=&quot;what-is-my-training-plan-for-this&quot;&gt;What is my training plan for this?&lt;&#x2F;h1&gt;
+&lt;p&gt;Would be editing this in a few days.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Day-3, Partial vs Full RSS Feeds</title>
+		<published>2021-08-02T00:00:00+00:00</published>
+		<updated>2021-08-02T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/day3/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/day3/</id>
+		<content type="html">&lt;p&gt;RSS is powerful. The issue with bookmarking your favourite sites is that you can&#x27;t keep checking them to see if they have been updated or if they have any new articles. RSS solves this issue, hence the name &lt;strong&gt;R&lt;&#x2F;strong&gt;eally &lt;strong&gt;S&lt;&#x2F;strong&gt;imple &lt;strong&gt;S&lt;&#x2F;strong&gt;yndication.&lt;&#x2F;p&gt;
+&lt;p&gt;I have been using &lt;a href=&quot;https:&#x2F;&#x2F;feedly.com&#x2F;&quot;&gt;Feedly&lt;&#x2F;a&gt; for more than a week now, and RSS has enabled me to have a custom feed of articles that I made. Not something that was recommended due to it being &amp;quot;viral&amp;quot; or a program deciding based on my interests.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;one-tiny-issue-though&quot;&gt;One tiny issue though&lt;&#x2F;h1&gt;
+&lt;p&gt;I am greeted with this screen very frequently while checking my RSS reader.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day3&#x2F;partial_feed.png&quot; alt=&quot;Partial Feed&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;What&#x27;s the issue you ask? Well, I don&#x27;t like the above but the one below:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day3&#x2F;full_feed.png&quot; alt=&quot;Full Feed&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;I don&#x27;t dislike the articles by any chance, if that&#x27;s what you thought. They are very well written and that too by the people I have had the opportunity to interact with. (Link to &lt;a href=&quot;https:&#x2F;&#x2F;orkohunter.net&#x2F;blog&#x2F;huxleys-world-of-perceptions&#x2F;&quot;&gt;first&lt;&#x2F;a&gt; and &lt;a href=&quot;https:&#x2F;&#x2F;mukul-mehta.in&#x2F;posts&#x2F;aws-experiments&#x2F;&quot;&gt;second&lt;&#x2F;a&gt; article)&lt;&#x2F;p&gt;
+&lt;p&gt;The issue is that I can&#x27;t enjoy a centralized custom article feed if I can&#x27;t read them in the same place. I don&#x27;t want to move back and forth between everyone&#x27;s blog and my RSS reader.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;why-the-difference&quot;&gt;Why the difference?&lt;&#x2F;h1&gt;
+&lt;p&gt;At first I noticed that the websites with full page content were using Atom (Atom Syndication Format) instead of normal RSS.&lt;&#x2F;p&gt;
+&lt;p&gt;Atom was made to fix the issues with RSS specifically that with the structure that made it hard to parse data and check for updates. &lt;a href=&quot;https:&#x2F;&#x2F;nullprogram.com&#x2F;blog&#x2F;2013&#x2F;09&#x2F;23&#x2F;&quot;&gt;This article&lt;&#x2F;a&gt; does a good work to explain the ways Atom made things easier for everyone behind the scenes. But, after looking for almost 30 minutes I wasn&#x27;t able to find anything related to full page content being specific to Atom.&lt;&#x2F;p&gt;
+&lt;p&gt;Searching for &amp;quot;partial rss feeds&amp;quot; showed the right way I should be searching in.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;partial-vs-full-rss-feeds&quot;&gt;Partial vs Full RSS Feeds&lt;&#x2F;h1&gt;
+&lt;p&gt;Having an RSS feed with partial or full page content is a choice. Why one should choose one over the other is a matter of debate.&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;s better to know the arguments of both the sides to form opinions.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;where-are-your-readers-reading-you&quot;&gt;Where are your readers reading you?&lt;&#x2F;h2&gt;
+&lt;p&gt;The decision to whether have the full or partial page content in RSS feed depends a lot on how your readers tend to read your articles. Any user would prefer the full feed as they wouldn&#x27;t have to move from site to site when checking their RSS reader.&lt;&#x2F;p&gt;
+&lt;p&gt;But this isn&#x27;t as easy is it seems.&lt;&#x2F;p&gt;
+&lt;p&gt;Showing the full feed would reduce the amount of people visiting your site, because why would they? This results in lesser page views and this in turn results in your website not showing in web results easily (Bad SEO).&lt;&#x2F;p&gt;
+&lt;p&gt;Having full feeds also make it easier for spam sites to copy your page content and show it on their website with a bunch of advertisements. Something similar happened with &lt;a href=&quot;https:&#x2F;&#x2F;kossiitkgp.org&#x2F;&quot;&gt;KOSS&#x27;s website&lt;&#x2F;a&gt; few months ago.&lt;&#x2F;p&gt;
+&lt;p&gt;What to do in this case? You would have to spend time finding the host or&#x2F;and the site owner, and write a strong worded email in hopes of the site being taken down. Not something I would like to spend my time on.&lt;&#x2F;p&gt;
+&lt;p&gt;Not only this, having multiple sites with the same content can also result in bad SEO ranking.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;what-do-your-readers-want&quot;&gt;What do your readers want?&lt;&#x2F;h2&gt;
+&lt;p&gt;As a reader myself, I find having the full page content makes things easier. At the same time, as a developer I want people to spend time on my website, appreciate the time I have put in styling it :p&lt;&#x2F;p&gt;
+&lt;p&gt;Having access to full page content can result less engagement on the website, which means lesser discussions in the comments. Not something I would like.&lt;&#x2F;p&gt;
+&lt;p&gt;Although I am still not so sure in the partial vs full feed debate, I am going to stick with showing the full page content for now. But one thing I know for sure is that &lt;a href=&quot;https:&#x2F;&#x2F;rakaar.github.io&#x2F;posts&#x2F;2021-07-23-use-rss&#x2F;&quot;&gt;RSS is underrated&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Day-2, Adding Copy to Clipboard Button to Codeblocks</title>
+		<published>2021-08-01T00:00:00+00:00</published>
+		<updated>2021-08-01T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/day2/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/day2/</id>
+		<content type="html">&lt;p&gt;Around two months ago, I had the opportunity of adding a copy to clipboard button for all codeblocks on a page. This is how I went about it.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;about-the-problem&quot;&gt;About the problem&lt;&#x2F;h1&gt;
+&lt;p&gt;Search results on &lt;a href=&quot;https:&#x2F;&#x2F;neera.ai&quot;&gt;Neera&lt;&#x2F;a&gt; are unique in a way that we show the top answer of all Stackoverflow questions when they are shown in the results.&lt;&#x2F;p&gt;
+&lt;p&gt;This is how they look when the page first loads:
+&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day2&#x2F;answer_closed.png&quot; alt=&quot;Initial Result View&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Once you click to see the answer:
+&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day2&#x2F;answer_open.png&quot; alt=&quot;Answer preview&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;This provided was an easy method to quickly get the accepted&#x2F;most upvoted answer on Stackoverflow.&lt;&#x2F;p&gt;
+&lt;p&gt;We did this by making a server which had an archive of all of Stackoverflow. We sent this server all the question id after after search and in return we received top answers of all the questions.
+More explained about how we set this up and put such a large archive in a database &lt;a href=&quot;https:&#x2F;&#x2F;hargup.substack.com&#x2F;p&#x2F;lab-notebook-creating-a-stackoverflow&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;okay-so-what-are-we-working-on&quot;&gt;Okay, so what are we working on?&lt;&#x2F;h2&gt;
+&lt;p&gt;Stackoverflow doesn&#x27;t have the feature of copying the contents of a multi-lined codeblock using a single click. We wanted to add a button to do the same to our answer previews.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;first-things-first&quot;&gt;First things first&lt;&#x2F;h2&gt;
+&lt;p&gt;I first inspected and saw that a &lt;code&gt;pre&lt;&#x2F;code&gt; tag is present before the usual &lt;code&gt;code&lt;&#x2F;code&gt; tag when it comes to multi-lined codeblocks.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;html&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-html &quot;&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;pre&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;code&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;	
+&lt;&#x2F;span&gt;&lt;span&gt;   ...
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;code&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;pre&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I din&#x27;t want a copy button when there is a single word or a few words of code, which is similar to single backticks in the case of markdown.&lt;&#x2F;p&gt;
+&lt;p&gt;Hence, I targeted the content of only those &lt;code&gt;&amp;lt;code&amp;gt;&lt;&#x2F;code&gt; tags that resided inside &lt;code&gt;&amp;lt;pre&amp;gt;&lt;&#x2F;code&gt; tags.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;too-much-talk-let-s-code-now&quot;&gt;Too much talk, let&#x27;s code now&lt;&#x2F;h2&gt;
+&lt;p&gt;This is the first iteration of code I wrote, after getting help from &lt;a href=&quot;https:&#x2F;&#x2F;www.dannyguo.com&#x2F;blog&#x2F;how-to-add-copy-to-clipboard-buttons-to-code-blocks-in-hugo&#x2F;&quot;&gt;this article&lt;&#x2F;a&gt;.
+This used JavaScript &lt;a href=&quot;https:&#x2F;&#x2F;developer.mozilla.org&#x2F;en-US&#x2F;docs&#x2F;Web&#x2F;API&#x2F;Navigator&#x2F;clipboard&quot;&gt;Clipboard API&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;javascript&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;addCopyButtons&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;clipboard&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;document&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;querySelectorAll&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;pre &amp;gt; code&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;forEach&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;codeBlock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span&gt;button &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;document&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;createElement&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;className &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;copy-code-button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Copy&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;addEventListener&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;click&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;      clipboard&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;writeText&lt;&#x2F;span&gt;&lt;span&gt;(codeBlock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;then&lt;&#x2F;span&gt;&lt;span&gt;(
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;          button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;blur&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;          button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Copied!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setTimeout&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;            button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Copy&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2000&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;},
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;          button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Error&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;      )&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I put the code above in the &lt;code&gt;useEffect&lt;&#x2F;code&gt; hook, as we use React for our frontend. This would add the buttons just when the page renders.&lt;&#x2F;p&gt;
+&lt;p&gt;Content with what I had written till now, I tried looking at what it looked like and to my surprise there was no button to be found :|&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;what-is-happening-or-to-be-exact-why-is-nothing-happening&quot;&gt;What is happening? or to be exact why is nothing happening?&lt;&#x2F;h2&gt;
+&lt;p&gt;Let&#x27;s go over the code once again, line by line this time.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;This would get all the content inside a code tag that exists inside a pre tag &lt;strong&gt;throughout the page&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;javascript&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;document&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;querySelectorAll&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;pre &amp;gt; code&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;forEach&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;codeBlock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;This creates a button with the &lt;code&gt;className&lt;&#x2F;code&gt; (instead of &lt;code&gt;class&lt;&#x2F;code&gt; because it&#x27;s React) and adds the text &amp;quot;Copy&amp;quot; inside of it&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;javascript&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span&gt;button &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;document&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;createElement&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;className &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;copy-code-button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Copy&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;This adds a click function while adding the button inside the codeblock. After clicking the button the text inside changes to &amp;quot;Copied!&amp;quot; which changes back to &amp;quot;Copy&amp;quot; after 2000 miliseconds. Also, it displays if any error encountered.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;javascript&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span&gt;button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;addEventListener&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;click&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;  clipboard&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;writeText&lt;&#x2F;span&gt;&lt;span&gt;(codeBlock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;then&lt;&#x2F;span&gt;&lt;span&gt;(
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;      button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;blur&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;      button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Copied!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setTimeout&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;        button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Copy&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2000&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;},
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;      button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;innerText &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Error&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;  )&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;While I know I didn&#x27;t go over &amp;quot;line by line&amp;quot;, but I still don&#x27;t see any issue. Do you?&lt;&#x2F;p&gt;
+&lt;p&gt;So after spending 20 minutes looking figuring out where I was going wrong in the developer tools, I realized the issue.&lt;&#x2F;p&gt;
+&lt;p&gt;Remember how the results look when results first render? and remember how I used &lt;code&gt;useEffect&lt;&#x2F;code&gt; and how it worked just when the page renders?&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;is-this-supposed-to-be-the-point-i-understand-things&quot;&gt;Is this supposed to be the point I understand things?&lt;&#x2F;h1&gt;
+&lt;p&gt;So, here is what&#x27;s happening:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Just when the page renders, the function to add buttons throughout the document runs.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;But, as the answers are closed at the start the answers aren&#x27;t part of the document.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;This is how it looks when I insepect the closed answer body&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;html&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-html &quot;&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    Show Answer
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;svg &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;svg&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;This is how it looks when I open the answer&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;html&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-html &quot;&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    Show Answer
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;svg &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;svg&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;p&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;Answered over 4 years ago&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;p&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;p&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;You can run &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;code&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;man lsof&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;code&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; to find out those flags.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;p&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;p&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        -w Enables (+) or disables (-) the suppression of warning messages.
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;p&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;      ...
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h1 id=&quot;explain-to-me-like-i-am-5-not-really-but-you-get-the-point&quot;&gt;Explain to me like I am 5 (not really, but you get the point)&lt;&#x2F;h1&gt;
+&lt;p&gt;The point that I am getting at is that till I opened the answers they aren&#x27;t a part of the document and even when I do open the answers the function to
+add buttons has already finished running. &lt;strong&gt;Hence, the reason there were no buttons is that there were no codeblocks at that time&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;what-now&quot;&gt;What now?&lt;&#x2F;h2&gt;
+&lt;p&gt;So now to solve this problem I had to make the function run at the same time the button is clicked to expand the answer, that should be enough right?&lt;&#x2F;p&gt;
+&lt;p&gt;Nope.&lt;&#x2F;p&gt;
+&lt;p&gt;It didn&#x27;t work, I figured that this could be due to a delay in adding the answer DOM to the document, but the function started running before. Hence I made the function run after a small delay of 50 miliseconds (I think we can go lower than this).&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;javascript&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span&gt;  onClick&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;={&lt;&#x2F;span&gt;&lt;span&gt;() =&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setShowAnswer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span&gt;!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;showAnswer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)&lt;&#x2F;span&gt;&lt;span&gt;;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; This boolean expands or collapses the answer
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setTimeout&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)&lt;&#x2F;span&gt;&lt;span&gt; =&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;addCopyButtons&lt;&#x2F;span&gt;&lt;span&gt;(navigator&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;clipboard)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;50&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This did what I wanted it to do.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;a-little-bit-of-styling-please&quot;&gt;A little bit of styling please&lt;&#x2F;h2&gt;
+&lt;p&gt;Then I wrote a bit of css to do the following:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;To position the button on the top right corner of a codeblock&lt;&#x2F;li&gt;
+&lt;li&gt;Change the colour on hover and while it&#x27;s active. Nothing special.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;pre data-lang=&quot;css&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-css &quot;&gt;&lt;code class=&quot;language-css&quot; data-lang=&quot;css&quot;&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;copy-code-button &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;color&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: #272822;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;background-color&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: #fff;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;border-color&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: #272822;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;border&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2px solid&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;border-radius&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;3px 3px 0px 0px&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;display&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;block&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;margin&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;25rem 0rem 0 auto&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;padding&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2rem&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;font-size&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;8em&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;copy-code-button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt;hover &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;cursor&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;pointer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;background-color&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: #f2f2f2;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;copy-code-button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt;focus &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;background-color&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: #e6e6e6;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;outline&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;copy-code-button&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt;active &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;background-color&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: #d9d9d9;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h1 id=&quot;the-result&quot;&gt;The Result&lt;&#x2F;h1&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day2&#x2F;end_result.png&quot; alt=&quot;The Stackoverflow Answer&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Day-1, Using RegEx to fix Slack API response</title>
+		<published>2021-07-31T00:00:00+00:00</published>
+		<updated>2021-07-31T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/day1/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/day1/</id>
+		<content type="html">&lt;p&gt;Just a few days ago I worked on a search plugin for Neera which would let an user search across multiple public slack workspaces.&lt;&#x2F;p&gt;
+&lt;p&gt;This solved two problems:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;One doesn&#x27;t have to know about a Slack workspace to search through it&lt;&#x2F;li&gt;
+&lt;li&gt;One can search across multiple workspaces concurrently&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;We (&lt;a href=&quot;https:&#x2F;&#x2F;rakaar.github.io&#x2F;&quot;&gt;Raghav&lt;&#x2F;a&gt; and I) used Slack&#x27;s search API after an app was added to that workspace. This post contains how I improved the Slack API response before rendering.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;what-s-the-problem-exactly&quot;&gt;What&#x27;s the problem exactly?&lt;&#x2F;h1&gt;
+&lt;p&gt;This is an example of how a single match looks like in the response of the Slack Search API, I removed the parts I didn&#x27;t need to keep this blog small:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;json&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-json &quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;[
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;message&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;ts&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;1611851000.000300&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;blocks&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: [
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;rich_text&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;block_id&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;rANHC&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;elements&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: [
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;rich_text_section&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;elements&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: [
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;text&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;text&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Interviews are coming up in 2&#x2F;3 months and everyone might be tensed on what to revise and how to learn so many things in such a shortage of time.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Don&amp;#39;t worry we have your back. We at &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;},
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;link&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;url&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;https:&#x2F;&#x2F;www.linkedin.com&#x2F;company&#x2F;edualgo&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;text&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;eduAlgo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;},
+&lt;&#x2F;span&gt;&lt;span&gt;              ....
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;emoji&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;heavy_check_mark&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot; },
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;text&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;text&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;The art of representing something&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Limited Seats! Get yourself one today&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;},
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;],
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;text&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Interviews are coming up in 2&#x2F;3 months and everyone might be tensed on what to revise and how to learn so many things in such a shortage of time.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Don&amp;#39;t worry we have your back. We at &amp;lt;https:&#x2F;&#x2F;www.linkedin.com&#x2F;company&#x2F;edualgo&#x2F;|eduAlgo&amp;gt; are coming up with something important for the interview preparation. This course is cheaper for money but not by quality.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;interview preparation has three main parameters,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:heavy_check_mark:practising enough problem&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:heavy_check_mark:fixing your communication skills&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:heavy_check_mark:learning how to represent a certain thing&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;This course (which is of Life Time availability) is meant to combine problem-solving, communicating with the interviewer and representation skills of a person up to a certain level so that that interviewee can be confident enough on what to do and what not to.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;What does this course contain?&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:heavy_check_mark:100 + Selected DSA problems solved through a video explanation&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:heavy_check_mark:150 + practise problems&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:heavy_check_mark:Aptitude Problems to practise&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:heavy_check_mark:A beginner&amp;#39;s guide to Communicating properly&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:heavy_check_mark:The art of representing something&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Limited Seats! Get yourself one today&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;&amp;lt;https:&#x2F;&#x2F;www.townscript.com&#x2F;e&#x2F;interview-preparation-114000&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;permalink&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;https:&#x2F;&#x2F;kwoc-koss.slack.com&#x2F;archives&#x2F;CQ8MLJ4TD&#x2F;p1611851000000300&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;no_reactions&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;slack_name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Kharagpur Winter of Code&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I am concerned with just the &lt;code&gt;text&lt;&#x2F;code&gt; and &lt;code&gt;permalink&lt;&#x2F;code&gt; for now, because all I want is to show the message and take someone to that message on click.
+I did the following without putting much thought:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;tsx&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-tsx &quot;&gt;&lt;code class=&quot;language-tsx&quot; data-lang=&quot;tsx&quot;&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;a &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;href&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;={&lt;&#x2F;span&gt;&lt;span&gt;item&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;permalink&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;rel&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;noreferrer nooepener&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;  {&lt;&#x2F;span&gt;&lt;span&gt;item&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.text}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This is how it looked which brought light to the two of the major issues with using &lt;code&gt;text&lt;&#x2F;code&gt; directly&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day1&#x2F;before_render.png&quot; alt=&quot;Before RegEx render&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Words with embedded links had word after a pipe:&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt; &amp;lt;https:&#x2F;&#x2F;www.linkedin.com&#x2F;company&#x2F;edualgo&#x2F;|eduAlgo&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Plain Links were in angle brackets but without the pipe&lt;&#x2F;li&gt;
+&lt;li&gt;Emojis had to removed too, they were present by their name &lt;code&gt;:heavy_check_mark:&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h1 id=&quot;fix-how&quot;&gt;Fix how?&lt;&#x2F;h1&gt;
+&lt;p&gt;I was working on a timeframe, had to get this in a presentable state in an hour or two. Using RegEx to change the links into anchor tags and remove the emojis and later passing the text as innerHTML of a div seemed like the best way.&lt;&#x2F;p&gt;
+&lt;p&gt;There was also an array within &lt;code&gt;blocks&lt;&#x2F;code&gt; named &lt;code&gt;elements&lt;&#x2F;code&gt; which had split the &lt;code&gt;text&lt;&#x2F;code&gt; into types like &amp;quot;text&amp;quot;, &amp;quot;link&amp;quot; and &amp;quot;emoji&amp;quot;. I could have formed the final text using that but thought it would longer and untidier than using RegEx.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;writing-regex-substitutions&quot;&gt;Writing RegEx substitutions&lt;&#x2F;h1&gt;
+&lt;ol&gt;
+&lt;li&gt;First step to writing RegEx (Regular Expression) is to open a RegEx tester. I like &lt;a href=&quot;https:&#x2F;&#x2F;regex101.com&#x2F;&quot;&gt;regex101.com&lt;&#x2F;a&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;Copy a sample text containing the strings you want to substitute or find. The one in the above JSON block is good as it contains both types of links and emojis.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;let-s-fix-the-links-first&quot;&gt;Let&#x27;s fix the links first&lt;&#x2F;h2&gt;
+&lt;p&gt;Let&#x27;s write both types of links and how I want them to look to work:&lt;&#x2F;p&gt;
+&lt;p&gt;Before:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;&amp;lt;https:&#x2F;&#x2F;www.linkedin.com&#x2F;company&#x2F;edualgo&#x2F;|eduAlgo&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;https:&#x2F;&#x2F;www.townscript.com&#x2F;e&#x2F;interview-preparation-114000&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;After:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;html&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-html &quot;&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;a &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;href&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;https:&#x2F;&#x2F;www.linkedin.com&#x2F;company&#x2F;edualgo&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; eduAlgo &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;a &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;href&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;https:&#x2F;&#x2F;www.townscript.com&#x2F;e&#x2F;interview-preparation-114000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  https:&#x2F;&#x2F;www.townscript.com&#x2F;e&#x2F;interview-preparation-114000
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Two cases:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;With pipe&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;ul&gt;
+&lt;li&gt;Select everything after &amp;lt; till a |&lt;&#x2F;li&gt;
+&lt;li&gt;Select the rest, i.e. after | till a &amp;gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;ol start=&quot;2&quot;&gt;
+&lt;li&gt;Or without a pipe&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;ul&gt;
+&lt;li&gt;Select everything between a &amp;lt; and &amp;gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day1&#x2F;link_regex.png&quot; alt=&quot;RegEx for links&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Substitution:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day1&#x2F;link_regex_substitution.png&quot; alt=&quot;Substitution after RegEx&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;let-s-remove-the-emojis-now&quot;&gt;Let&#x27;s remove the emojis now&lt;&#x2F;h2&gt;
+&lt;p&gt;Select everything between two colons that&#x27;s it, right? Nope. Consider this case:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;... :heavy_tick_mark:This blog is getting longer than expected :heavey_tick_mark: ....
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;One can say that there are two strings &amp;quot;heavy_tick_mark&amp;quot; inside colons but there is also one string &amp;quot;This blog is getting longer than expected&amp;quot; inside two colons.&lt;&#x2F;p&gt;
+&lt;p&gt;So we only want the strings inside colons &lt;strong&gt;that don&#x27;t contain any spaces&lt;&#x2F;strong&gt;. I wrote this for doing the same, notice the space after ^ and before :&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ex&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-ex &quot;&gt;&lt;code class=&quot;language-ex&quot; data-lang=&quot;ex&quot;&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;^ :&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;]+:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;gm
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now, insert the &lt;code&gt;text&lt;&#x2F;code&gt; into the div&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;tsx&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-tsx &quot;&gt;&lt;code class=&quot;language-tsx&quot; data-lang=&quot;tsx&quot;&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bb80b3;&quot;&gt;dangerouslySetInterHTML&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;={{ __html: &lt;&#x2F;span&gt;&lt;span&gt;item&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.text }}&amp;gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#eb606b;&quot;&gt;div&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h1 id=&quot;the-results&quot;&gt;The results&lt;&#x2F;h1&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;day1&#x2F;after_render.png&quot; alt=&quot;Results of regex&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>#100DaysOfWriting</title>
+		<published>2021-07-30T00:00:00+00:00</published>
+		<updated>2021-07-30T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/100-days-of-writing/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/100-days-of-writing/</id>
+		<content type="html">&lt;h1 id=&quot;why&quot;&gt;Why?&lt;&#x2F;h1&gt;
+&lt;p&gt;&amp;quot;Why?&amp;quot; is the easy part here, I always plan on writing but don&#x27;t. I made this blog on 25th Feb, 2021 and all there has been is 1 post.
+This is unacceptable, I can&#x27;t keep reading what other people write without putting down my own thoughts somewhere.&lt;&#x2F;p&gt;
+&lt;p&gt;Reading is never supposed to be one way thing, even if you &lt;a href=&quot;https:&#x2F;&#x2F;fs.blog&#x2F;2015&#x2F;01&#x2F;marginalia&#x2F;&quot;&gt;read a book you should think of it as a two-way communication&lt;&#x2F;a&gt; between the author and you.&lt;&#x2F;p&gt;
+&lt;p&gt;There is always &lt;a href=&quot;https:&#x2F;&#x2F;fs.blog&#x2F;2013&#x2F;04&#x2F;the-work-required-to-have-an-opinion&#x2F;&quot;&gt;some work that&#x27;s required to form opinions&lt;&#x2F;a&gt;, doing that work takes a significant effort. Something that not a lot of people do now. Anyone can read and repeat someone&#x27;s opinion and seem like they know something about something.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;why-100-days&quot;&gt;Why 100 days?&lt;&#x2F;h2&gt;
+&lt;p&gt;100DaysOf____ anything is just a personal challenge that you set for youself to do any action or allot time to something for everyday, for 100 days straight. Their &lt;a href=&quot;https:&#x2F;&#x2F;thegreatdiscontent.com&#x2F;100days&quot;&gt;website&lt;&#x2F;a&gt; does a better job at explaining:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;It’s a celebration of process that encourages everyone to participate in 100 days of making. The great surrender is the process; showing up day after day is the goal. For the 100-Day Project, it’s not about fetishizing finished products—it’s about the process.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;It&#x27;s not something completly new for me as I did something similar to explore programming (#100DaysOfCode). It was beneficial in a way as rather than asking &amp;quot;why do coding today?&amp;quot; it became &amp;quot;what to code today?&amp;quot;.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;why-a-blog-and-not-a-diary&quot;&gt;Why a Blog and not a Diary?&lt;&#x2F;h1&gt;
+&lt;p&gt;According to Oxford dicionary, a blog is&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;a regularly updated website or web page, typically one run by an individual or small group, that is written in an informal or conversational style.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Blogs have always been a learning place for me, there are a lot of technical blogs out there which make you feel as if you are solving a problem
+together with the writer. There are blogs which you stumble upon which may have never been read, but turn out to be the best thing you have read
+in a long time.&lt;&#x2F;p&gt;
+&lt;p&gt;Not only technical blogs, after finishing a book or a movie there&#x27;s this strong urge of talking to someone about it or knowing what other people
+think about it, any kind of writing is beneficial at this point.&lt;&#x2F;p&gt;
+&lt;p&gt;Thoughts whether right or wrong should be penned down, that too openly, because only then you remember the point you had about something
+and also discuss the same with other people. &lt;a href=&quot;https:&#x2F;&#x2F;rakaar.github.io&#x2F;posts&#x2F;2021-07-01-useful-discussions-open&#x2F;&quot;&gt;Discussions&#x2F;notes should be public&lt;&#x2F;a&gt; that is how people learn and interact, putting the effort to make them organized and readable enough to be public, is beneficial for both the writer and the reader.&lt;&#x2F;p&gt;
+&lt;p&gt;Over time not much of what I am think now would be left. I won&#x27;t remember any small details of an achievement, I won&#x27;t remember any setbacks and much of what I learned from them. All of these would turn into small blips of emotions over a large span of time.
+I feel as if even if I don&#x27;t know much there&#x27;s always something I can write about which is enough for someone to fix something or start learning something.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;so-what-now&quot;&gt;So what now?&lt;&#x2F;h1&gt;
+&lt;p&gt;It&#x27;s almost 4 am now, the time I take decisions I regret the most about. But it is what it is. Can&#x27;t go back now. (Well, technically I can but you get the point)&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;the-articles-that-led-me-to-this-point&quot;&gt;The articles that led me to this point:&lt;&#x2F;h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;parth-paradkar.me&#x2F;posts&#x2F;write-anyways&#x2F;&quot;&gt;Write Anyways, by Parth Paradkar&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.siddharthkannan.in&#x2F;100daysofwriting&#x2F;writing&#x2F;2017&#x2F;02&#x2F;18&#x2F;day-1-begin&#x2F;&quot;&gt;Why Write and The Unreserved, by Siddharth Kannan&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;orkohunter.net&#x2F;blog&#x2F;we-should-write-notes&#x2F;&quot;&gt;We should write notes (for life lessons), by Orkohunter&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Let&#x27;s Learn About OAuth!</title>
+		<published>2021-06-21T00:00:00+00:00</published>
+		<updated>2021-06-21T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/oauth/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/oauth/</id>
+		<content type="html">&lt;p&gt;It&#x27;s been a few weeks since I been implementing OAuth to integrate different kinds of searches for services like &lt;a href=&quot;https:&#x2F;&#x2F;getpocket.com&#x2F;&quot;&gt;Pocket&lt;&#x2F;a&gt;, &lt;a href=&quot;https:&#x2F;&#x2F;developers.notion.com&#x2F;&quot;&gt;Notion&lt;&#x2F;a&gt; and &lt;a href=&quot;https:&#x2F;&#x2F;developers.google.com&#x2F;drive&#x2F;api&#x2F;v3&#x2F;about-sdk&quot;&gt;Drive&lt;&#x2F;a&gt; for &lt;a href=&quot;https:&#x2F;&#x2F;neera.ai&#x2F;&quot;&gt;Neera&lt;&#x2F;a&gt;. This is a way of documenting everything I have done&#x2F;read till now.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;basics-first&quot;&gt;Basics First&lt;&#x2F;h2&gt;
+&lt;p&gt;Suppose you want to make an application which searches through drive files and folders for different users. How do you go about giving your application access to a user&#x27;s files? &lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Do you directly ask your user to give their credentials to you? So that you can those to get their files yourself.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Technically, that would work. But a lot of people wouldn&#x27;t give you their credentials, if not all. &lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Or you can ask the user to give a limited access to their files, through which the application can interact with Drive on your behalf. This would only involve the user proving their identity to Google without sharing any credentials to you. &lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;This is what OAuth does. It is the &lt;strong&gt;authorization of two services&lt;&#x2F;strong&gt; so that they can interact on their own, on preset terms which the user agrees to. &lt;&#x2F;p&gt;
+&lt;p&gt;OAuth stands for Open Authorization. It&#x27;s a process through which an application or website can access private data from another website without having to make the user give any kind of sensitive information to third party websites.&lt;&#x2F;p&gt;
+&lt;p&gt;This is also the process you go through when you choose to sign up with your Google or Facebook account while signing up for something else. Just remember how you get redirected to a familiar login when signing up, after which you get back to where you started. &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;history-second&quot;&gt;History Second&lt;&#x2F;h2&gt;
+&lt;p&gt;The idea behind OAuth began in November 2006, when few engineers met to discuss about Twitter OpenID and Ma.gnolia APIs. They concluded that there were no open standards for API access delegation. &lt;&#x2F;p&gt;
+&lt;p&gt;Later an OAuth discussion group was created, which was joined by multiple people who coordinated the contributions creating a more formal specification. &lt;&#x2F;p&gt;
+&lt;p&gt;All of these efforts led to further standardization and hence on 2010, OAuth 1.0 protocol was published and later OAuth 2.0, which we use today and would mostly discuss, was published in 2012. &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;terminology-third&quot;&gt;Terminology Third&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;User&lt;&#x2F;strong&gt;: The user is who authorizes an application to access their account. &lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Client&lt;&#x2F;strong&gt;: The client is the application that&#x27;s trying to access the user&#x27;s account. &lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Scope&lt;&#x2F;strong&gt;: It specifies the level of access that the application is requesting form the client. The application&#x27;s access to the user&#x27;s account is limited to the scope of authorization granted (eg. read or write access)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Resource Server&lt;&#x2F;strong&gt;: This is the server which contains all the resources. It only returns data to authenticated requests. &lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Authorization Server&lt;&#x2F;strong&gt;: This server validates the user&#x27;s credentials and redirects the user to the consent screen, which is the place the user is informed about the scopes the client application is requesting. On acceptance, the user is redirected back to to client with an access token. &lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Access Token&lt;&#x2F;strong&gt;: This is token which is given after the OAuth is completed by a user. This token should be present in every request made by the client, and it is the way the resource server confirms that the authorization has taken place.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Redirect URI&lt;&#x2F;strong&gt;: This is where you would be redirect to once the user accepts everything in the consent screen or when the OAuth is completed.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;it-s-authorization-time&quot;&gt;It&#x27;s Authorization Time&lt;&#x2F;h2&gt;
+&lt;p&gt;The OAuth workflow may look complicated, hence let&#x27;s divide the whole process into steps and analyze each step. I tried making a flowchart to explain the whole process. &lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;sahil-shubham.in&#x2F;posts&#x2F;oauth&#x2F;oauth-flow.png&quot; alt=&quot;OAuth Flow&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;but-wait&quot;&gt;But, wait&lt;&#x2F;h3&gt;
+&lt;p&gt;Before you can begin the OAuth process in your application, you must register it with the service. Few examples of this service can be Drive, Notion and Pocket. &lt;&#x2F;p&gt;
+&lt;p&gt;This is necessary as it tells the company about your application. Usually, you would be required to give information such as application name, website, a logo etc. You would also be required to tell the redirect uri(s), scope(s) etc. &lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;This step mostly involves the user clicking on a button which has a link with the following parameters: &lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre style=&quot;background-color:#2b2c2f;color:#cccece;&quot;&gt;&lt;code&gt;&lt;span&gt;https:&#x2F;&#x2F;authorization-server.com&#x2F;auth?response_type=code&amp;amp;client_id=CLIENT_ID&amp;amp;redirect_uri=REDIRECT_URI&amp;amp;scope=read
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;response_type=code&lt;&#x2F;strong&gt;: This indicates to the authorization server that your server expects to receive an authorization code&#x2F;access token.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;client_id&lt;&#x2F;strong&gt;: This a code that you get when you first create an application&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;scope&lt;&#x2F;strong&gt;: One or more scopes&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;ol start=&quot;2&quot;&gt;
+&lt;li&gt;When redirected to this page, you would be welcomed by the login screen which later would take you to the consent screen. If you are already logged in, you would be seeing the consent screen directly.&lt;&#x2F;li&gt;
+&lt;li&gt;Once given the client application is given the permission, the user would be redirected back to the redirect URI with a code. This is where we put a &amp;quot;middle screen&amp;quot; which I named callback. &lt;&#x2F;li&gt;
+&lt;li&gt;This is the screen where you tell the user that you are redirecting them back to the place they started, but you are also sending a request back to the authorization server with the code. This request is made to get the access token. &lt;&#x2F;li&gt;
+&lt;li&gt;Once the above request is successful, the user is redirected back to the where you want, and this time with the access token. This access token needs to be attached to the headers or as query parameter of all the future requests from the client to the resource server.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;a-few-differences&quot;&gt;A Few differences&lt;&#x2F;h2&gt;
+&lt;p&gt;The access token is generally supposed to be valid for a limited time, this brings the question of what to do when the access token expires? &lt;&#x2F;p&gt;
+&lt;p&gt;Rather than going through the whole process of authorization once again, the client also receives a token called &lt;strong&gt;refresh_token&lt;&#x2F;strong&gt;, this token is mostly sent only for the first time an OAuth is done and needs to stored. &lt;&#x2F;p&gt;
+&lt;p&gt;When there is a limited life to access tokens, the client needs to send the refresh token with the access token to handle the case when the access token is expired. The resource server then &amp;quot;refreshes&amp;quot; the access token and uses the same for the original request. &lt;&#x2F;p&gt;
+&lt;p&gt;Among the three services I have been working with, drive is the only one which sends an access token with a limited life. &lt;&#x2F;p&gt;
+&lt;h1 id=&quot;bonus-section&quot;&gt;Bonus Section&lt;&#x2F;h1&gt;
+&lt;h2 id=&quot;pocket-authorization-differences&quot;&gt;Pocket authorization differences&lt;&#x2F;h2&gt;
+&lt;p&gt;Pocket&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;getpocket.com&#x2F;developer&#x2F;&quot;&gt;developer docs&lt;&#x2F;a&gt; mention that &lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;quot;The Pocket Authentication API uses a &lt;strong&gt;variant&lt;&#x2F;strong&gt; of OAuth 2.0 for authentication&amp;quot;. &lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;The word &amp;quot;variant&amp;quot; is important here. For making an application which uses an user&#x27;s pocket&#x27;s data, you first have to obtain a &lt;strong&gt;request token&lt;&#x2F;strong&gt; which is added as a parameter in the link of the button you click in step 1.  After accepting on the consent screen, you are once again given a code and redirect to your callback screen through which you get your access token. &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;oauth-1-0-vs-oauth-2-0&quot;&gt;OAuth 1.0 vs OAuth 2.0&lt;&#x2F;h2&gt;
+&lt;p&gt;The differences between the two types of OAuth was one the first questions that popped in my mind when I read that OAuth 2.0 is a complete rewrite of OAuth 1.0. I will try to go over few of the differences.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;support-for-non-browser-based-applications&quot;&gt;Support for non-browser based applications&lt;&#x2F;h3&gt;
+&lt;p&gt;OAuth 1.0 had a lack of support for non-browser based clients. But, OAuth 2.0 used a different flow for authorizing a client which made it easier&#x2F;possible for non-browser clients. This was on the of main advantages of OAuth 2.0 over OAuth 1.0.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;ease-of-implementation&quot;&gt;Ease of Implementation&lt;&#x2F;h3&gt;
+&lt;p&gt;OAuth 1.0 was often criticized for the barrier it posed to writing a client. There is a shared secret that is used to sign the arguments for the authorization request by the client, which also need to be passed in the exact order. &lt;&#x2F;p&gt;
+&lt;p&gt;OAuth 2.0 got rid of all signatures and cryptography at the protocol level, so as to rely solely on TLS. People did bring up concerns regarding the same, mentioning reasons such as yet-undiscovered zero-day TLS vulnerabilities which can potentially comprise the entire system.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;so-what-does-the-above-mean&quot;&gt;So what does the above mean?&lt;&#x2F;h3&gt;
+&lt;p&gt;All of the above doesn&#x27;t mean that OAuth 1.0 is obsolete and that everyone should to move to OAuth 2.0. There are still a lot of companies which continue using OAuth 1.0 or a variant of it (OAuth1.0a for Twitter). &lt;&#x2F;p&gt;
+&lt;p&gt;OAuth 2.0 is also not necessarily more secure than OAuth 1.0, there are a lot of things which much be checked when working with OAuth 2.0 to prevent any harm to security. Like making sure the redirect URI is validated, and that access tokens don&#x27;t end up in the browser history. There is also a &lt;a href=&quot;https:&#x2F;&#x2F;tools.ietf.org&#x2F;id&#x2F;draft-ietf-oauth-security-topics-10.html&quot;&gt;document by IETF for best current practices for OAuth 2.0 security&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;I also landed about &lt;a href=&quot;https:&#x2F;&#x2F;gist.github.com&#x2F;nckroy&#x2F;dd2d4dfc86f7d13045ad715377b6a48f&quot;&gt;an article by one the the original authors of OAuth 2.0,  Eran Hammer&lt;&#x2F;a&gt;, in which mentioned a lot of flaws of the system compared to OAuth 1.0 which led to him withdrawing his name from the specification. He mentions his concerns in the end by writing: &lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;quot;I think the OAuth brand is in decline. This framework will live for a  while, and given the lack of alternatives, it will gain widespread  adoption. But we are also  &lt;strong&gt;likely to see major security failures in the next couple of years&lt;&#x2F;strong&gt;  and the slow but steady devaluation of the brand. It will be another hated protocol you are stuck with.&amp;quot;&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;But he also mentions that&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;quot;OAuth 2.0 at the hand of a developer with deep understanding of web security will likely result is a secure implementation&amp;quot;&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Hello, World!</title>
+		<published>2021-02-25T00:00:00+00:00</published>
+		<updated>2021-02-25T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://sahil-shubham.in/posts/hello-world/" type="text/html"/>
+		<id>https://sahil-shubham.in/posts/hello-world/</id>
+		<content type="html">&lt;h2 id=&quot;hello-world&quot;&gt;Hello, World!&lt;&#x2F;h2&gt;
+&lt;p&gt;Hi there. &lt;&#x2F;p&gt;
+&lt;p&gt;That&#x27;s all I want to say. &lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

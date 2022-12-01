@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta content="chrome=1" http-equiv="X-UA-Compatible"/>
+        <meta content="True" name="HandheldFriendly"/>
+        <meta content="320" name="MobileOptimized"/>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <meta content="no-referrer" name="referrer"/>
+        
+            <link href='&#x2F;favicons&#x2F;site.webmanifest' rel="manifest"/>
+        
+        
+        
+            <link href='&#x2F;favicons&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png"/>
+        
+        
+            <link href='&#x2F;favicons&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png"/>
+        
+        
+            <link href='&#x2F;favicons&#x2F;apple-touch-icon.png' rel="apple-touch-icon" sizes="180x180"/>
+        
+        <link href="https://sahil-shubham.in/fonts.css" rel="stylesheet"/>
+        <link href="https://sahil-shubham.in/style.css" rel="stylesheet"/>
+        <title>
+            
+    Day-3, Partial vs Full RSS Feeds
+
+        </title>
+        
+
+        <script async defer data-website-id="9b2dfb9e-f887-4742-8a97-d49a487f5463" src="https://umami.sahil-shubham.in/umami.js"></script>
+    </head>
+    <body>
+        
+<div class="wrap">
+  <script>
+    (function initTheme() {
+      let body = document.getElementsByTagName('body')[0];
+      if (window.localStorage.getItem('theme') !== null) {
+        if (window.localStorage.getItem('theme') === 'dark') {
+          body.setAttribute('data-theme', 'dark');
+        } else {
+          body.setAttribute('data-theme', 'light');
+        }
+      } else {
+        if (
+          window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches
+        ) {
+          body.setAttribute('data-theme', 'dark');
+        }
+      }
+    })();
+  </script>
+  <div class="section">
+    <div class="theme-switcher">
+    <div class="theme-button" onClick="toggleTheme()">
+        <label for="cb1">
+            <svg
+                id="dayIcon"
+                style="enable-background:new 0 0 35 35;"
+                version="1.1"
+                viewBox="0 0 35 35"
+                x="0px"
+                xml:space="preserve"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns="http://www.w3.org/2000/svg"
+                y="0px">
+                <g id="Sun">
+                    <g>
+                        <path
+                            d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5 S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z
+                                M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5
+                                C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6
+                                C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9
+                                c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44
+                                l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5
+                                c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06 L6.439,8.561z
+                                M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z
+                                M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2
+                                C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29
+                                c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7
+                                C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5
+                                c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z"
+                            style="fill-rule:evenodd;clip-rule:evenodd;"/>
+                    </g>
+                </g>
+            </svg>
+        </label>
+        <input class="toggle" id="cb1" onClick="toggleTheme()" type="checkbox"/>
+        <label class="toggle-button" for="cb1"></label>
+        <label for="cb1">
+            <svg
+                enable-background="new 0 0 100 100"
+                id="nightIcon"
+                version="1.1"
+                viewBox="0 0 100 100"
+                x="0px"
+                xml:space="preserve"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns="http://www.w3.org/2000/svg"
+                y="0px">
+                <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571
+                C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23
+                c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369
+                c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65 c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z"/>
+            </svg>
+        </label>
+    </div>
+</div>
+  </div>
+  <div class="section" id="title">
+    
+    Day-3, Partial vs Full RSS Feeds
+
+
+  </div>
+
+  <div class="section" id="content">
+    
+    
+        <div class="byline">
+            
+                
+    
+    Monday  2 Aug, 2021
+
+            
+            
+                
+                    &#183; 685 words
+                
+            
+            
+                
+                
+                    &#183; 4 min
+                
+            
+        </div>
+        
+        <hr/>
+    <p>RSS is powerful. The issue with bookmarking your favourite sites is that you can't keep checking them to see if they have been updated or if they have any new articles. RSS solves this issue, hence the name <strong>R</strong>eally <strong>S</strong>imple <strong>S</strong>yndication.</p>
+<p>I have been using <a href="https://feedly.com/">Feedly</a> for more than a week now, and RSS has enabled me to have a custom feed of articles that I made. Not something that was recommended due to it being &quot;viral&quot; or a program deciding based on my interests.</p>
+<h1 id="one-tiny-issue-though">One tiny issue though</h1>
+<p>I am greeted with this screen very frequently while checking my RSS reader.</p>
+<p><img src="https://sahil-shubham.in/posts/day3/partial_feed.png" alt="Partial Feed" /></p>
+<p>What's the issue you ask? Well, I don't like the above but the one below:</p>
+<p><img src="https://sahil-shubham.in/posts/day3/full_feed.png" alt="Full Feed" /></p>
+<p>I don't dislike the articles by any chance, if that's what you thought. They are very well written and that too by the people I have had the opportunity to interact with. (Link to <a href="https://orkohunter.net/blog/huxleys-world-of-perceptions/">first</a> and <a href="https://mukul-mehta.in/posts/aws-experiments/">second</a> article)</p>
+<p>The issue is that I can't enjoy a centralized custom article feed if I can't read them in the same place. I don't want to move back and forth between everyone's blog and my RSS reader.</p>
+<h1 id="why-the-difference">Why the difference?</h1>
+<p>At first I noticed that the websites with full page content were using Atom (Atom Syndication Format) instead of normal RSS.</p>
+<p>Atom was made to fix the issues with RSS specifically that with the structure that made it hard to parse data and check for updates. <a href="https://nullprogram.com/blog/2013/09/23/">This article</a> does a good work to explain the ways Atom made things easier for everyone behind the scenes. But, after looking for almost 30 minutes I wasn't able to find anything related to full page content being specific to Atom.</p>
+<p>Searching for &quot;partial rss feeds&quot; showed the right way I should be searching in.</p>
+<h1 id="partial-vs-full-rss-feeds">Partial vs Full RSS Feeds</h1>
+<p>Having an RSS feed with partial or full page content is a choice. Why one should choose one over the other is a matter of debate.</p>
+<p>It's better to know the arguments of both the sides to form opinions.</p>
+<h2 id="where-are-your-readers-reading-you">Where are your readers reading you?</h2>
+<p>The decision to whether have the full or partial page content in RSS feed depends a lot on how your readers tend to read your articles. Any user would prefer the full feed as they wouldn't have to move from site to site when checking their RSS reader.</p>
+<p>But this isn't as easy is it seems.</p>
+<p>Showing the full feed would reduce the amount of people visiting your site, because why would they? This results in lesser page views and this in turn results in your website not showing in web results easily (Bad SEO).</p>
+<p>Having full feeds also make it easier for spam sites to copy your page content and show it on their website with a bunch of advertisements. Something similar happened with <a href="https://kossiitkgp.org/">KOSS's website</a> few months ago.</p>
+<p>What to do in this case? You would have to spend time finding the host or/and the site owner, and write a strong worded email in hopes of the site being taken down. Not something I would like to spend my time on.</p>
+<p>Not only this, having multiple sites with the same content can also result in bad SEO ranking.</p>
+<h2 id="what-do-your-readers-want">What do your readers want?</h2>
+<p>As a reader myself, I find having the full page content makes things easier. At the same time, as a developer I want people to spend time on my website, appreciate the time I have put in styling it :p</p>
+<p>Having access to full page content can result less engagement on the website, which means lesser discussions in the comments. Not something I would like.</p>
+<p>Although I am still not so sure in the partial vs full feed debate, I am going to stick with showing the full page content for now. But one thing I know for sure is that <a href="https://rakaar.github.io/posts/2021-07-23-use-rss/">RSS is underrated</a>.</p>
+
+    
+    <div class="social-icons">
+        
+            <a class="social-icons__link" href=mailto:hello@sahil-shubham.in rel="noopener" target="_blank">
+                <svg
+                    class="feather feather-mail"
+                    class="scicon"
+                    fill="none"
+                    height="24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+            </a>
+        
+        
+            <a class="social-icons__link" href=https:&#x2F;&#x2F;github.com&#x2F;sahil-shubham rel="noopener" target="_blank">
+                <svg
+                    class="featherfeather-github"
+                    class="scicon"
+                    fill="none"
+                    height="24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    viewBox="002424"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7
+                        0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                </svg>
+            </a>
+        
+        
+            <a class="social-icons__link" href=https:&#x2F;&#x2F;twitter.com&#x2F;sahil_shubham_ rel="noopener" target="_blank">
+                <svg
+                    class="feather feather-twitter"
+                    class="scicon"
+                    fill="none"
+                    height="24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                </svg>
+            </a>
+        
+        
+            <a class="social-icons__link" href=https:&#x2F;&#x2F;sahil-shubham.in&#x2F;atom.xml rel="noopener" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+            </a>
+        
+        
+    </div>
+
+    
+        <h1>Comments</h1>
+        <script src="https://utteranc.es/client.js"
+            repo="sahil-shubham/sahil-shubham.in"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
+    
+
+  </div>
+  <script
+    src="https://sahil-shubham.in/main.js"
+    type="text/javascript"
+  ></script>
+  
+    <div class="section bottom-menu">
+        <hr/>
+        <p>
+            
+                
+                    <a href="&#x2F;about">about</a>
+                    &#183;
+                
+                    <a href="&#x2F;posts">posts</a>
+                    &#183;
+                
+                    <a href="&#x2F;resume.pdf">resume</a>
+                    &#183;
+                
+            
+            <a href="https:&#x2F;&#x2F;sahil-shubham.in">
+                home
+            </a>
+            &#183;
+            <a href="https:&#x2F;&#x2F;github.com&#x2F;sahil-shubham">
+                github
+            </a>
+            &#183;
+            <a href="https:&#x2F;&#x2F;twitter.com&#x2F;sahil_shubham_">
+                twitter
+            </a>
+            &#183;
+            <a href="https:&#x2F;&#x2F;sahil-shubham.in&#x2F;atom.xml">
+                rss
+            </a>
+        </p>
+                   
+    </div>
+
+</div>
+
+    </body>
+</html>
