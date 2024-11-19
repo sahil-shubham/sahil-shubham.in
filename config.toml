@@ -1,7 +1,7 @@
 # The URL the site will be built for
 base_url = "https://sahil-shubham.in"
 title = "Sahil Shubham"
-lang = "en"
+default_language = "en"
 
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
@@ -10,11 +10,10 @@ theme = "sam"
 # Whether to build a search index to be used later on by a JavaScript library
 build_search_index = false
 
-check_external_links = "true"
+[link_checker]
+internal_level = "warn"
 
-taxonomies = [
-    {name = "tags", rss = true}
-]
+taxonomies = [{ name = "tags", rss = true }]
 
 # To generate rss feed 
 generate_feed = true
@@ -37,7 +36,7 @@ home = "home"
 sam_menu = [
     { text = "about", link = "/about" },
     { text = "posts", link = "/posts" },
-    {text = "resume", link="/resume.pdf"}
+    { text = "resume", link = "/resume.pdf" },
 ]
 
 sam_bottom_menu = true
@@ -46,7 +45,7 @@ sam_bottom_menu = true
 favicon_16x16 = "/favicons/favicon-16x16.png"
 favicon_32x32 = "/favicons/favicon-32x32.png"
 apple_touch_icon = "/favicons/apple-touch-icon.png"
-webmanifest = "/favicons/site.webmanifest" 
+webmanifest = "/favicons/site.webmanifest"
 
 [extra.youtube]
 video_id = "GFBZgsHmPo4"
